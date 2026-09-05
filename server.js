@@ -328,9 +328,17 @@ app.post('/api/manager-login/:boatId', async (req, res) => {
 // Swipe's two API base URLs to use.
 // SWIPE_PRO_AMOUNT: MVR amount charged for a 30-day Pro period (defaults to
 // the same ރ500 shown in the manual bank-transfer flow).
+// MALDEXPRESS_SWIPE_WEBHOOK_URL: this Swipe client/wallet
+// (greenwoodsinvestment@swipe) is shared with a second app, Maldexpress,
+// for its own Pro-tier payments. Swipe allows only one webhook URL per
+// client and it points at this server, so /api/webhooks/swipe relays any
+// event that belongs to Maldexpress (transaction_code prefixed
+// "maldexpress_") on to this URL untouched. Leave unset to disable the
+// relay entirely -- every event then falls through to SeaFare's own logic.
 const SWIPE_CLIENT_ID = process.env.SWIPE_CLIENT_ID;
 const SWIPE_CLIENT_SECRET = process.env.SWIPE_CLIENT_SECRET;
 const SWIPE_WEBHOOK_SECRET = process.env.SWIPE_WEBHOOK_SECRET;
+const MALDEXPRESS_SWIPE_WEBHOOK_URL = process.env.MALDEXPRESS_SWIPE_WEBHOOK_URL;
 const SWIPE_BASE_URL = process.env.SWIPE_ENV === 'development'
   ? 'https://merchant-api.swipeapp.dev'
   : 'https://api.swipe.mv';
@@ -614,6 +622,50 @@ app.post('/api/webhooks/swipe', async (req, res) => {
     if(!verifySwipeWebhookSignature(req.headers, rawBody)){
       return res.status(401).json({ ok:false, error:'Invalid webhook signature.' });
     }
+
+    // --- Maldexpress relay ------------------------------------------------
+    // The Swipe client/wallet behind this webhook is shared with a second
+    // app (Maldexpress) for its own Pro payments, and Swipe only allows one
+    // webhook URL per client. Any event Maldexpress created -- identified by
+    // a transaction_code it minted with a "maldexpress_" prefix -- is not
+    // ours: forward the original request verbatim (same raw body, same
+    // webhook-id/webhook-timestamp/webhook-signature headers) to
+    // Maldexpress's own endpoint and mirror that call's outcome back to
+    // Swipe, so a failure there still gets retried by Swipe. SeaFare does no
+    // further processing for these events. Events without the prefix fall
+    // straight through to SeaFare's own logic below, unchanged. If
+    // MALDEXPRESS_SWIPE_WEBHOOK_URL is unset the relay is inert.
+    const swipeRef = (req.body && req.body.data && req.body.data.transaction_code) || '';
+    if(MALDEXPRESS_SWIPE_WEBHOOK_URL && swipeRef.startsWith('maldexpress_')){
+      if(!req.rawBody){
+        // Only the exact bytes Swipe signed can be forwarded -- a
+        // re-serialized body would fail Maldexpress's signature check.
+        // Treat a missing raw body as a failed delivery so Swipe retries.
+        console.error('swipe->maldexpress relay: raw body unavailable, not forwarding');
+        return res.status(502).json({ ok:false, error:'relay body unavailable' });
+      }
+      try{
+        const relayed = await fetch(MALDEXPRESS_SWIPE_WEBHOOK_URL, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'webhook-id': req.headers['webhook-id'],
+            'webhook-timestamp': req.headers['webhook-timestamp'],
+            'webhook-signature': req.headers['webhook-signature'],
+          },
+          body: req.rawBody,
+          signal: AbortSignal.timeout(10000),
+        });
+        if(relayed.ok) return res.json({ ok:true, relayed:true });
+        console.error(`swipe->maldexpress relay: upstream returned HTTP ${relayed.status}`);
+        return res.status(502).json({ ok:false, relayed:true, upstreamStatus: relayed.status });
+      }catch(e){
+        // Network error or the 10s timeout -- non-2xx so Swipe retries.
+        console.error('swipe->maldexpress relay failed', e);
+        return res.status(502).json({ ok:false, relayed:true });
+      }
+    }
+
     const { eventType, data } = req.body || {};
     if(eventType !== 'transaction.state_changed' || !data){
       return res.json({ ok:true }); // acknowledged, nothing to do
