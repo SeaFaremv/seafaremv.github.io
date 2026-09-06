@@ -245,25 +245,23 @@
      ltr explicitly so it's never at the mercy of some future default
      change to the <html> dir attribute. */
   html:not([lang="dv"]) header.app-head{direction:ltr;}
-  /* Hamburger (#header-settings-btn) is pinned to a fixed corner of the
-     header box itself -- top-right in English, top-left in Dhivehi --
-     rather than flowing inside the second header row with the (now
-     hidden) role-pill/theme-toggle. position:absolute here lifts it out
-     of that row entirely, so it always sits in the same header corner
-     regardless of how much the brand/name/clock above it wraps. header
-     .app-head is the positioning parent (see position:relative above).
-     openAppMenu()'s positionAppMenu() reads the button's live
-     getBoundingClientRect(), so the menu keeps anchoring correctly under
-     it here with no JS changes needed. */
+  /* Hamburger (#header-settings-btn) is now a direct flex child of
+     header.app-head, sitting right alongside .brand as the second item on
+     that very first row -- not pinned by pixel math to a corner, but
+     placed by the header's own flex layout, so align-items:center lines
+     its vertical center up with the logo/name row exactly, and
+     justify-content:space-between pushes it to the far end of that same
+     row (see markup: it comes right after .brand, before the full-width
+     role-pill/theme-toggle wrapper, which still forces itself onto its
+     own second line via width:100% same as before). In English (ltr) that
+     end is the right; in Dhivehi the whole row's direction is rtl (see
+     above), which flips the flex main axis so the same "last item" lands
+     on the left instead -- no separate left/right rule needed per
+     language. openAppMenu()'s positionAppMenu() reads the button's live
+     getBoundingClientRect(), so the menu still anchors correctly under it
+     with no JS changes. */
   header.app-head #header-settings-btn{
-    position:absolute;
-    top:18px;
-    right:4px;
-    z-index:2;
-  }
-  html[lang="dv"] header.app-head #header-settings-btn{
-    right:auto;
-    left:4px;
+    flex-shrink:0;
   }
   /* Small moon/sun theme toggle, sitting in the header right next to the
      settings gear (see header-settings-btn) rather than buried inside the
@@ -1119,17 +1117,22 @@
       display:flex;flex-direction:column;
       max-width:920px;margin:0 auto;padding:0;
       overflow:hidden;
+      /* Explicit rather than the default auto -- makes the whole shell
+         (including the bottom tab bar inside it, see nav.tabs order:3
+         below) unambiguously one stacking context sitting under any
+         overlay/dropdown/modal (all z-index 2000+, appended straight to
+         <body> as .shell's siblings), instead of leaving that comparison
+         to each browser's default handling of two adjacent
+         position:fixed elements with no z-index set. isolation:isolate
+         pins that stacking context down further, so nothing transitioning
+         inside .shell (the tab bar's own max-height/padding transition
+         for the header-collapse effect, for one) can get promoted to its
+         own compositing layer and end up painted out of order, above an
+         overlay that should be covering it. */
+      z-index:1;
+      isolation:isolate;
     }
     header.app-head{flex-shrink:0;order:1;padding:calc(14px + env(safe-area-inset-top)) 16px 6px;margin:0;transition:padding 0.45s ease-in-out;}
-    /* Keep the corner hamburger tracking the notch/status-bar inset as the
-       header's own top padding does, and sit it a bit further in from the
-       edge to match this breakpoint's wider 16px side padding. */
-    header.app-head #header-settings-btn{
-      top:calc(env(safe-area-inset-top) + 14px);
-      right:12px;
-      transition:top 0.45s ease-in-out;
-    }
-    html[lang="dv"] header.app-head #header-settings-btn{ left:12px; }
     .mode-toggle{order:2;flex-shrink:0;margin:6px 16px 0;}
     .panel{order:2;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;margin:0 16px 16px;border-radius:12px;transition:margin 0.45s ease-in-out, border-radius 0.45s ease-in-out;}
     /* Once the header's collapsed (scrolled down far enough that it's
@@ -1582,7 +1585,7 @@ body.admin-mode{
   <header class="app-head">
     <div class="brand">
       <div class="brand-mark" id="brand-logo-btn" role="button" tabindex="0" style="cursor:pointer;" title="Refresh">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l1.5-6h15L21 17"/><path d="M5 17v2a1 1 0 001 1h12a1 1 0 001-1v-2"/><path d="M12 3v8"/><path d="M8 6l4-3 4 3"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l1.5-6h15L21 17"/><path d="M5 17v2a1 1 0 001 1h12a1 1 0 001-1v-2"/><path d="M12 3v8"/><path d="M8 6l4-3 4 3"/></svg>
         <span id="pro-badge-corner" class="pro-corner-badge" style="display:none;"><svg viewBox="0 0 24 20" fill="currentColor"><path d="M3 14 L3 7 L7.5 11 L12 3 L16.5 11 L21 7 L21 14 L21 16.5 Q21 17 20.5 17 L3.5 17 Q3 17 3 16.5 Z"/><circle cx="3" cy="7" r="1.6"/><circle cx="12" cy="3" r="1.8"/><circle cx="21" cy="7" r="1.6"/></svg></span>
       </div>
       <div>
@@ -1593,17 +1596,17 @@ body.admin-mode{
         <span id="clock">--</span>
       </div>
     </div>
+    <button type="button" id="header-settings-btn" title="Menu" style="display:none;background:rgba(255,255,255,0.08);border:none;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F4F9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
+      </svg>
+    </button>
     <div style="display:flex;align-items:center;gap:8px;width:100%;justify-content:space-between;">
       <div class="role-pill" id="role-pill" style="display:none;">
         <span class="rlabel" id="role-label"></span>
         <button id="switch-role-btn">Log out</button>
       </div>
       <button type="button" id="header-theme-toggle-btn" class="header-theme-toggle" style="display:none;margin-inline-start:auto;" title="Dark Mode"></button>
-      <button type="button" id="header-settings-btn" title="Menu" style="display:none;background:rgba(255,255,255,0.08);border:none;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F4F9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
-        </svg>
-      </button>
     </div>
   </header>
 
@@ -2915,8 +2918,27 @@ function autoBlurOnAutofill(input){
   });
 }
 
+// On the phone-width fixed app-shell (see the ≤900px media query: .shell
+// itself is position:fixed;inset:0 and html/body already get
+// overflow:hidden), the page behind a dropdown/modal can't scroll in the
+// first place -- there's nothing here for the iOS "lock body scroll by
+// pinning it to position:fixed" trick to actually prevent. Applying that
+// trick anyway was the cause of the bottom tab bar visibly jumping
+// upward every time a dropdown (like the header hamburger menu) opened:
+// toggling `body{position:fixed}` on top of an already-fixed, already
+// non-scrolling shell forces a reflow that can make mobile Safari
+// briefly re-show/hide its own URL bar, which changes the visual
+// viewport height the fixed bottom nav sits against -- reads as the tab
+// bar "coming up" over whatever just opened. Below 900px this now just
+// tracks the lock count for balance and skips touching body's position
+// entirely; the desktop/tablet layout (where .shell scrolls normally and
+// this lock is actually needed to stop the page behind a modal from
+// scrolling) is untouched.
+function isMobileAppShell(){
+  return window.matchMedia('(max-width:900px)').matches;
+}
 function lockBodyScroll(){
-  if(_scrollLockCount === 0){
+  if(_scrollLockCount === 0 && !isMobileAppShell()){
     _scrollLockY = window.scrollY || window.pageYOffset || 0;
     document.body.style.position = 'fixed';
     document.body.style.top = `-${_scrollLockY}px`;
@@ -2929,7 +2951,7 @@ function lockBodyScroll(){
 function unlockBodyScroll(){
   if(_scrollLockCount <= 0) return;
   _scrollLockCount--;
-  if(_scrollLockCount === 0){
+  if(_scrollLockCount === 0 && document.body.style.position === 'fixed'){
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.left = '';
@@ -6002,22 +6024,20 @@ document.addEventListener('touchend', () => { _scrollDismissTouchY = null; _scro
 // fully expanded (--tp: 0) to fully collapsed (--tp: 1). Tied directly to
 // scrollTop every scroll event fires, on Home only; every other tab keeps
 // --tp pinned at 0 so its header never moves.
+// --tp is now hard-pinned at 0 everywhere, including Home: the header no
+// longer shrinks/fades on scroll at all, so this listener just keeps the
+// "badge-tucked" un-toggled instead of running the collapse math it used
+// to. Left in place (rather than removed outright) since badge-tucked and
+// --tp are still read elsewhere (see the CSS above) -- this just never
+// drives them past their resting state now.
 const HOME_HEADER_COLLAPSE_DISTANCE = 90;
 document.addEventListener('scroll', (e) => {
   const target = e.target;
   if(!target || (target.id !== 'panel' && target.id !== 'gate-area')) return;
-  const active = document.activeElement;
-  if(active && ['INPUT','TEXTAREA','SELECT'].includes(active.tagName)) return;
   const shell = document.querySelector('.shell');
   if(!shell) return;
-  if(state.tab !== 'dashboard'){
-    shell.style.setProperty('--tp', '0');
-    shell.classList.remove('badge-tucked');
-    return;
-  }
-  const progress = Math.max(0, Math.min(1, target.scrollTop / HOME_HEADER_COLLAPSE_DISTANCE));
-  shell.style.setProperty('--tp', progress.toFixed(3));
-  shell.classList.toggle('badge-tucked', progress > 0.5);
+  shell.style.setProperty('--tp', '0');
+  shell.classList.remove('badge-tucked');
 }, true);
 
 // Resizes and re-compresses a captured photo before it ever touches the
