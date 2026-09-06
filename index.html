@@ -166,6 +166,25 @@
   }
 
   *{box-sizing:border-box;}
+  /* App-wide: never show a visible scrollbar track/thumb on ANY scrollable
+     element, on any screen/role (Dashboard's .panel, the gate/login
+     #gate-area, every invoice/photo/list/report/admin popup panel, the
+     custom select & date/time picker menus, item-search results, etc).
+     A few individual elements already hid their own scrollbar this way
+     (.tp-col, .filter-scroll-row above) -- this just makes that the
+     default everywhere instead of something each new scrollable element
+     has to opt into by hand, since a bare scrollbar line was still
+     showing up while scrolling on ones that hadn't. Purely visual --
+     scrolling itself (and swipe/drag scrolling) works exactly the same;
+     only the OS/browser's scrollbar chrome is suppressed. */
+  *{
+    scrollbar-width:none; /* Firefox */
+    -ms-overflow-style:none; /* old Edge/IE */
+  }
+  *::-webkit-scrollbar{
+    display:none; /* Chrome, Safari, newer Edge */
+    width:0; height:0;
+  }
   html,body{
     margin:0;padding:0;
     width:100%;
@@ -3306,6 +3325,9 @@ function openInvoicePopup(shipmentId){
   overlay.addEventListener('click', (e) => { if(e.target === overlay) closeInvoicePopup(); });
   document.body.appendChild(overlay);
   wireInvoicePopupButtons(shipmentId);
+  // Swipe the invoice card down (from the top of its scroll) to close it,
+  // same as tapping outside or its own close mark.
+  enableDragToDismiss(document.getElementById('invoice-popup-panel'), overlay, closeInvoicePopup);
 }
 
 // Wires up every button inside the invoice popup's current content --
@@ -8023,6 +8045,11 @@ function openTrackDetailPopup(shipmentId){
   document.body.appendChild(overlay);
   document.getElementById('track-detail-popup-close-btn').addEventListener('click', closeTrackDetailPopup);
   overlay.querySelectorAll('[data-share-image]').forEach(b => b.addEventListener('click', () => shareInvoiceImage(s)));
+  // Swipe this invoice/tracking card down (from the top of its scroll) to
+  // close it, same as tapping outside or its own close mark -- this is the
+  // popup customers see on their tracking link, so it needs the same three
+  // ways to close as the owner/staff invoice popup.
+  enableDragToDismiss(document.getElementById('track-detail-popup-panel'), overlay, closeTrackDetailPopup);
 }
 function closeTrackDetailPopup(){
   if(document.getElementById('track-detail-popup-overlay')) unlockBodyScroll();
@@ -8863,6 +8890,97 @@ function photoLinkHtml(s){
     </div>
   `;
 }
+// Adds a "slide it away to close" drag gesture to a popup card, alongside
+// whatever other ways it already closes (tap the backdrop outside it,
+// press its own close mark). One shared implementation wired into every
+// popup that needs it (the photo lightbox below, the invoice popups
+// further up/down the file) instead of a copy per popup, so it behaves
+// identically -- and gets fixed in one place -- no matter which role's
+// end opened it (owner, manager, staff, admin, or a customer's tracking
+// link all end up calling the same opener functions).
+// - freeDrag:true (used for the photo) lets the card be dragged away in
+//   ANY direction, since there's nothing scrollable inside it to fight
+//   over -- the whole card is just an image.
+// - freeDrag:false/omitted (used for the invoice-style popups, which
+//   scroll vertically when their content is tall) only starts the
+//   dismiss-drag on a downward drag that begins with the panel already
+//   scrolled to the very top. That's the same rule real bottom-sheet/
+//   modal UIs use so a swipe meant to scroll the invoice never gets
+//   hijacked into closing it instead -- scrolling down through a tall
+//   invoice works exactly as before, and only a swipe down from the top
+//   slides the card away.
+// Touch-driven (this is a phone app), with mouse-drag support too so it
+// still works from a desktop browser/admin screen.
+function enableDragToDismiss(cardEl, overlayEl, closeFn, opts){
+  if(!cardEl || !overlayEl) return;
+  const freeDrag = !!(opts && opts.freeDrag);
+  const threshold = 90;
+  let active = false, startX = 0, startY = 0, dx = 0, dy = 0;
+
+  const begin = (x, y, target) => {
+    if(!freeDrag){
+      // Bail out (let the normal vertical scroll happen) unless this drag
+      // starts on/above the card while it's already scrolled to the top.
+      if(cardEl.scrollTop > 0) return false;
+    }
+    active = true; startX = x; startY = y; dx = 0; dy = 0;
+    cardEl.style.transition = 'none';
+    return true;
+  };
+  const move = (x, y) => {
+    if(!active) return;
+    dx = x - startX; dy = y - startY;
+    if(!freeDrag){
+      if(dy < 0){ dx = 0; dy = 0; } // ignore an upward drag entirely -- that's a scroll, not a dismiss
+      dx = 0; // vertical-only slide for the card popups, so it doesn't drift sideways
+    }
+    cardEl.style.transform = `translate(${dx}px, ${dy}px)`;
+    const dist = Math.hypot(dx, dy);
+    overlayEl.style.opacity = String(Math.max(0, 1 - dist / 350));
+  };
+  const finish = () => {
+    if(!active) return;
+    active = false;
+    const dist = Math.hypot(dx, dy);
+    cardEl.style.transition = 'transform 0.2s ease-out';
+    overlayEl.style.transition = 'opacity 0.2s ease-out';
+    if(dist > threshold){
+      const angle = Math.atan2(dy, dx || 1);
+      cardEl.style.transform = `translate(${Math.cos(angle)*900}px, ${Math.sin(angle)*900}px)`;
+      overlayEl.style.opacity = '0';
+      setTimeout(closeFn, 190);
+    } else {
+      cardEl.style.transform = 'translate(0,0)';
+      overlayEl.style.opacity = '1';
+    }
+  };
+
+  cardEl.addEventListener('touchstart', (e) => {
+    if(e.touches.length !== 1) return;
+    const t = e.touches[0];
+    begin(t.clientX, t.clientY, e.target);
+  }, { passive: true });
+  cardEl.addEventListener('touchmove', (e) => {
+    if(!active) return;
+    const t = e.touches[0];
+    move(t.clientX, t.clientY);
+  }, { passive: true });
+  cardEl.addEventListener('touchend', finish);
+  cardEl.addEventListener('touchcancel', finish);
+
+  cardEl.addEventListener('mousedown', (e) => {
+    if(e.button !== 0) return;
+    if(!begin(e.clientX, e.clientY, e.target)) return;
+    const onMove = (ev) => move(ev.clientX, ev.clientY);
+    const onUp = () => {
+      finish();
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+}
 function openPhotoLightbox(src, filename){
   const wrap = document.createElement('div');
   wrap.className = 'photo-lightbox-wrap';
@@ -8879,6 +8997,9 @@ function openPhotoLightbox(src, filename){
   // since the card is a separate child element a tap on it wouldn't match.
   wrap.addEventListener('click', (e) => { if(e.target === wrap) close(); });
   wrap.querySelector('.photo-lightbox-close').addEventListener('click', close);
+  // Drag the photo away in any direction to close it, same as tapping
+  // outside or the close mark.
+  enableDragToDismiss(wrap.querySelector('.photo-lightbox-card'), wrap, close, { freeDrag: true });
 }
 // Delegated globally (not re-attached per render) since photoLinkHtml's
 // output gets inserted via innerHTML in many different card templates --
@@ -14107,11 +14228,23 @@ window.addEventListener('scroll', repositionOpenPickers, { passive: true });
 // taller than its box) scroll normally, and blocks everything else --
 // a drag starting on the header, the bottom nav, or plain background --
 // which is what used to read as "the background is still scrollable".
+// This also has to recognize HORIZONTALLY-scrollable rows (overflow-x,
+// e.g. .filter-scroll-row's "Awaiting load / Loaded / In Transit / ..."
+// chips on the dashboard) -- it originally only ever checked overflow-y,
+// so a sideways drag on that row matched nothing in the loop below and
+// fell through to the final preventDefault(), silently swallowing the
+// gesture. That happened on every role's dashboard (owner, manager,
+// staff alike, since they all share this one listener and the same
+// dashboard markup) -- it just tended to get noticed on the staff end
+// first, since Dashboard/that chip row is staff's main (often only)
+// screen. Checking both axes here fixes it everywhere at once.
 document.addEventListener('touchmove', (e) => {
   let el = e.target;
   while(el && el !== document.body){
     const style = window.getComputedStyle(el);
-    if((style.overflowY === 'auto' || style.overflowY === 'scroll') && el.scrollHeight > el.clientHeight){
+    const scrollsY = (style.overflowY === 'auto' || style.overflowY === 'scroll') && el.scrollHeight > el.clientHeight;
+    const scrollsX = (style.overflowX === 'auto' || style.overflowX === 'scroll') && el.scrollWidth > el.clientWidth;
+    if(scrollsY || scrollsX){
       return;
     }
     el = el.parentElement;
