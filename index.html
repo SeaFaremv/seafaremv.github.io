@@ -41,10 +41,14 @@
     --surface:#EEF6FD;
     /* Slightly shrinks all English UI text app-wide. Dhivehi is kept at
        its original size via the html[lang="dv"] override below, since
-       Thaana glyphs need the extra size to stay legible. */
-    --en-scale:0.9;
+       Thaana glyphs need the extra size to stay legible. --font-scale is
+       an additional user-adjustable multiplier on top of that (see
+       Preferences in the menu / applyFontScale()), default 1 = unchanged. */
+    --en-scale-base:0.9;
+    --font-scale:1;
+    --en-scale:calc(var(--en-scale-base) * var(--font-scale));
   }
-  html[lang="dv"]{ --en-scale:1; }
+  html[lang="dv"]{ --en-scale-base:1; }
   /* Dark theme -- Pro-only, toggled from Settings (see setDarkTheme/
      applyTheme). Overrides just the panel/card/text palette; the app's
      outer navy chrome (body background, header) and its saturated accent
@@ -81,6 +85,49 @@
   html[data-theme="dark"] .panel,
   html[data-theme="dark"] .stat-card{
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='70'%3E%3Cpath d='M0,35 Q35,10 70,35 T140,35' stroke='rgba(255,255,255,0.04)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0,55 Q35,30 70,55 T140,55' stroke='rgba(64,217,192,0.05)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0,15 Q35,-10 70,15 T140,15' stroke='rgba(255,255,255,0.025)' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+  }
+
+  /* Glass theme -- a translucent-surface treatment layered on top of
+     whichever light/dark palette is active, toggled independently from
+     Preferences (see setGlassTheme() / data-glass attribute). Only ever
+     changes background opacity, blur and border on the existing surfaces
+     above -- never layout, color meaning, or the SVG wave pattern already
+     set on them -- so switching it off ("Classic") cleanly restores the
+     original solid look. Uses background-color (not the background
+     shorthand) everywhere so it layers over each element's existing
+     background-image instead of clearing it. */
+  html[data-glass="on"] .panel,
+  html[data-glass="on"] .stat-card{
+    background-color:rgba(255,255,255,0.72);
+    backdrop-filter:blur(20px) saturate(160%);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+    border:1px solid rgba(255,255,255,0.4);
+  }
+  html[data-glass="on"] .tag{
+    background-color:rgba(255,255,255,0.4);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+  }
+  html[data-glass="on"] nav.tabs,
+  html[data-glass="on"] .mode-toggle{
+    background-color:rgba(255,255,255,0.12);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,0.18);
+  }
+  html[data-glass="on"] header.app-head #header-settings-btn{
+    background:rgba(255,255,255,0.14) !important;
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+  }
+  html[data-theme="dark"][data-glass="on"] .panel,
+  html[data-theme="dark"][data-glass="on"] .stat-card{
+    background-color:rgba(15,23,33,0.62);
+    border-color:rgba(255,255,255,0.12);
+  }
+  html[data-theme="dark"][data-glass="on"] .tag{
+    background-color:rgba(15,23,33,0.4);
+    border-color:rgba(255,255,255,0.1);
   }
 
   *{box-sizing:border-box;}
@@ -148,7 +195,7 @@
   .shell{max-width:920px;margin:0 auto;padding:20px 16px 60px;touch-action:pan-y;}
   header.app-head{
     display:flex;align-items:center;justify-content:space-between;
-    padding:18px 4px 22px;flex-wrap:wrap;gap:10px;
+    padding:18px 4px 10px;flex-wrap:wrap;gap:10px;
   }
   /* The header's own layout (logo, brand name, settings gear, role pill)
      stays pinned in its left-to-right arrangement for English. For
@@ -189,11 +236,11 @@
   .brand{display:flex;align-items:center;gap:12px;position:relative;}
   .brand-mark{
     position:relative;
-    width:40px;height:40px;border-radius:6px;background:var(--amber);
+    width:40px;height:40px;border-radius:6px;background:none;
     display:flex;align-items:center;justify-content:center;flex-shrink:0;
-    box-shadow:0 2px 0 rgba(0,0,0,0.25);
+    box-shadow:none;
   }
-  .brand-mark svg{width:55%;height:55%;stroke:var(--navy-deep); animation: brand-roll 2.4s linear infinite; transform-origin: 50% 50%;}
+  .brand-mark svg{width:80%;height:80%;stroke:#F4F9FF;transform-origin: 50% 50%;}
   /* Two pro crown badges, only one ever visible at a time:
      -- #pro-badge (.pro-badge-inline) sits beside the app name, same as
         any other header icon. This is the default everywhere: desktop,
@@ -337,6 +384,14 @@
   .brand-name-wrap{ display:flex;align-items:center;gap:5px;flex-shrink:0; }
 
 
+  /* Both now surfaced inside the hamburger menu (see openAppMenu()) rather
+     than as their own header buttons -- kept in the DOM, and still updated
+     by the existing renderTabs()/renderHeaderThemeToggle() logic so the menu
+     can read their current text/state, but never shown in the header row
+     itself. !important beats the plain inline display:flex/block those
+     functions still set on them. */
+  header.app-head #role-pill,
+  header.app-head #header-theme-toggle-btn{ display:none !important; }
   .role-pill{
     display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.08);
     padding-block:6px;padding-inline:14px 6px;border-radius:24px;
@@ -363,7 +418,7 @@
 
   nav.tabs{
     display:flex;gap:6px;background:rgba(255,255,255,0.06);
-    padding:5px;border-radius:10px;margin-bottom:22px;flex-wrap:wrap;
+    padding:5px;border-radius:10px;margin-bottom:12px;flex-wrap:wrap;
   }
   nav.tabs button{
     flex:1;min-width:110px;
@@ -1009,8 +1064,8 @@
       max-width:920px;margin:0 auto;padding:0;
       overflow:hidden;
     }
-    header.app-head{flex-shrink:0;order:1;padding:calc(14px + env(safe-area-inset-top)) 16px 12px;margin:0;transition:padding 0.45s ease-in-out;}
-    .mode-toggle{order:2;flex-shrink:0;margin:10px 16px 0;}
+    header.app-head{flex-shrink:0;order:1;padding:calc(14px + env(safe-area-inset-top)) 16px 6px;margin:0;transition:padding 0.45s ease-in-out;}
+    .mode-toggle{order:2;flex-shrink:0;margin:6px 16px 0;}
     .panel{order:2;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;margin:0 16px 16px;border-radius:12px;transition:margin 0.45s ease-in-out, border-radius 0.45s ease-in-out;}
     /* Once the header's collapsed (scrolled down far enough that it's
        shrunk to just the logo, or vanished entirely on Home), the panel
@@ -1479,10 +1534,9 @@ body.admin-mode{
         <button id="switch-role-btn">Log out</button>
       </div>
       <button type="button" id="header-theme-toggle-btn" class="header-theme-toggle" style="display:none;margin-inline-start:auto;" title="Dark Mode"></button>
-      <button type="button" id="header-settings-btn" style="display:none;background:rgba(255,255,255,0.08);border:none;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F4F9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:brand-roll 3.5s linear infinite;">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      <button type="button" id="header-settings-btn" title="Menu" style="display:none;background:rgba(255,255,255,0.08);border:none;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F4F9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
         </svg>
       </button>
     </div>
@@ -2440,6 +2494,245 @@ function wireHeaderThemeToggle(){
     }, 175);
   });
 }
+// ---------------- Glass theme + font size (device-level Preferences) ----
+// Unlike darkTheme (Pro-only, per-boat, server-persisted -- see setDarkTheme
+// above), the glass look and the font-size step are plain local device
+// preferences: free for every role, including the customer portal and the
+// pre-login gate screens, so they're just read from/written to
+// localStorage rather than the boat's Settings record.
+const GLASS_THEME_KEY = 'seafare_glass_theme';
+const FONT_SCALE_KEY = 'seafare_font_scale';
+function loadGlassPref(){
+  try{ return localStorage.getItem(GLASS_THEME_KEY) !== 'off'; }catch(e){ return true; }
+}
+function applyGlassTheme(on){
+  state.glassTheme = !!on;
+  document.documentElement.setAttribute('data-glass', state.glassTheme ? 'on' : 'off');
+}
+function setGlassTheme(on){
+  applyGlassTheme(on);
+  try{ localStorage.setItem(GLASS_THEME_KEY, on ? 'on' : 'off'); }catch(e){}
+}
+const FONT_SCALE_STEPS = [
+  { key:'small',  label:'Small',       value:0.88 },
+  { key:'medium', label:'Medium',      value:1 },
+  { key:'large',  label:'Large',       value:1.15 },
+  { key:'xlarge', label:'Extra Large', value:1.3 },
+];
+function loadFontScalePref(){
+  try{
+    const step = FONT_SCALE_STEPS.find(s => s.key === localStorage.getItem(FONT_SCALE_KEY));
+    return step ? step.value : 1;
+  }catch(e){ return 1; }
+}
+function applyFontScale(value){
+  state.fontScale = value;
+  document.documentElement.style.setProperty('--font-scale', value);
+}
+function setFontScale(key){
+  const step = FONT_SCALE_STEPS.find(s => s.key === key) || FONT_SCALE_STEPS[1];
+  applyFontScale(step.value);
+  try{ localStorage.setItem(FONT_SCALE_KEY, step.key); }catch(e){}
+}
+function currentFontScaleKey(){
+  const step = FONT_SCALE_STEPS.find(s => Math.abs(s.value - (state.fontScale || 1)) < 0.001);
+  return step ? step.key : 'medium';
+}
+// Small pill-style chip shared by every Light/Dark/Classic/Glass/font-size
+// control in the Preferences popup -- plain inline styles rather than the
+// app's .btn/.btn-ghost classes, since those assume a light card background
+// (dark navy text) while this popup sits on the same dark translucent panel
+// as the themed dropdowns (see .custom-select-menu).
+function prefChipHtml(attr, value, label, active){
+  const style = active
+    ? 'background:var(--teal);color:#08202F;font-weight:700;border:none;'
+    : 'background:rgba(255,255,255,0.08);color:#F4F9FF;border:1px solid rgba(255,255,255,0.18);';
+  return `<button type="button" ${attr}="${value}" style="flex:1;padding:10px 4px;border-radius:8px;cursor:pointer;font-family:'Oswald',sans-serif;letter-spacing:0.03em;text-transform:uppercase;font-size:calc(10.5px * var(--en-scale));${style}">${label}</button>`;
+}
+
+/* ---------------- Hamburger app menu ---------------- */
+// Opened from the single header-settings-btn (now a hamburger icon, see the
+// header markup and renderTabs()) on every role. Surfaces what used to be
+// three separate header items -- the role-pill (boat/role name + Log out)
+// and the Settings shortcut -- plus the new Preferences entry, in one
+// themed popup anchored under the button, reusing the same frosted-glass
+// dropdown look as the app's other themed popups (.custom-select-menu).
+function closeAppMenu(){
+  document.getElementById('app-menu-overlay')?.remove();
+  clearAnchoredDropdown();
+}
+function positionAppMenu(menu, btn){
+  const r = btn.getBoundingClientRect();
+  const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+  const width = Math.min(260, window.innerWidth - 16);
+  menu.style.width = width + 'px';
+  menu.style.left = Math.max(8, Math.min(r.right - width, window.innerWidth - width - 8)) + 'px';
+  menu.style.top = (r.bottom + 8) + 'px';
+  menu.style.maxHeight = Math.max(160, vh - (r.bottom + 8) - 10) + 'px';
+}
+function openAppMenu(){
+  closeAppMenu();
+  closePreferencesPopup();
+  const btn = document.getElementById('header-settings-btn');
+  if(!btn) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'custom-select-overlay';
+  overlay.id = 'app-menu-overlay';
+  const menu = document.createElement('div');
+  menu.className = 'custom-select-menu';
+  overlay.appendChild(menu);
+  document.body.appendChild(overlay);
+  positionAppMenu(menu, btn);
+  setAnchoredDropdown(menu, btn);
+  overlay.addEventListener('mousedown', (e) => { if(e.target === overlay) closeAppMenu(); });
+
+  const hasSettingsTab = (getRoleTabs()[state.role] || []).some(tb => tb.id === 'settings');
+  const isInternal = state.entryMode === 'internal';
+  let nameHtml = '';
+  if(isInternal && getRoles()[state.role]){
+    const roleText = getRoles()[state.role].name + (state.staffName ? ' \u00b7 ' + state.staffName : '');
+    const boatName = _boatNameCache[CURRENT_BOAT_ID] || '';
+    nameHtml = `<div class="custom-select-title" style="text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-size:calc(13.5px * var(--en-scale));color:#F4F9FF;padding:14px 18px 10px;">${escapeHtml([boatName, roleText].filter(Boolean).join(' \u00b7 '))}</div>`;
+  }
+  const items = [];
+  if(hasSettingsTab){
+    items.push(`<button type="button" class="custom-select-option" data-menu-action="settings"><span>${t('Settings')}</span></button>`);
+  }
+  items.push(`<button type="button" class="custom-select-option" data-menu-action="preferences"><span>${t('Preferences')}</span></button>`);
+  if(isInternal){
+    items.push(`<button type="button" class="custom-select-option" data-menu-action="logout" style="color:#FF8A80;"><span>${t('Log out')}</span></button>`);
+  }
+  menu.innerHTML = nameHtml + items.join('');
+  menu.querySelector('[data-menu-action="settings"]')?.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    closeAppMenu();
+    location.hash = 'settings';
+  });
+  menu.querySelector('[data-menu-action="preferences"]')?.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    closeAppMenu();
+    openPreferencesPopup();
+  });
+  menu.querySelector('[data-menu-action="logout"]')?.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    closeAppMenu();
+    logoutInternal();
+  });
+}
+
+/* ---------------- Preferences popup (theme + font size) ---------------- */
+// A centered themed modal rather than an anchored dropdown, since it holds
+// several rows of controls -- opened from the app menu above, reachable
+// from every role. Dark/Light stays the existing Pro-gated, per-boat
+// setting (see setDarkTheme); Glass and Font Size are free, local, and
+// apply immediately app-wide, including on the gate/login screens.
+function closePreferencesPopup(){
+  if(document.getElementById('preferences-popup-overlay')){ unlockBodyScroll(); }
+  document.getElementById('preferences-popup-overlay')?.remove();
+}
+function openPreferencesPopup(){
+  closePreferencesPopup();
+  closeAppMenu();
+  const overlay = document.createElement('div');
+  overlay.className = 'custom-select-overlay';
+  overlay.id = 'preferences-popup-overlay';
+  overlay.style.display = 'flex';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+  overlay.style.padding = '16px';
+  const menu = document.createElement('div');
+  menu.className = 'custom-select-menu';
+  menu.style.position = 'relative';
+  menu.style.width = 'min(360px, 100%)';
+  menu.style.maxHeight = '85vh';
+  overlay.appendChild(menu);
+  document.body.appendChild(overlay);
+  lockBodyScroll();
+  overlay.addEventListener('mousedown', (e) => { if(e.target === overlay) closePreferencesPopup(); });
+
+  function draw(){
+    const pro = isProAccount();
+    const fsKey = currentFontScaleKey();
+    menu.innerHTML = `
+      <div class="custom-select-title" style="padding:16px 18px 2px;font-size:calc(13px * var(--en-scale));">${t('Preferences')}</div>
+      <div style="padding:10px 18px 6px;">
+        <div class="custom-select-title" style="padding:0 0 8px;">Appearance</div>
+        <div style="display:flex;gap:8px;margin-bottom:18px;">
+          ${prefChipHtml('data-pref-glass', 'off', 'Classic', !state.glassTheme)}
+          ${prefChipHtml('data-pref-glass', 'on', 'Glass', !!state.glassTheme)}
+        </div>
+        <div class="custom-select-title" style="padding:0 0 8px;opacity:${pro?1:0.5};">${pro ? 'Theme' : 'Theme \u2014 Pro feature'}</div>
+        <div style="display:flex;gap:8px;margin-bottom:18px;opacity:${pro?1:0.5};">
+          ${prefChipHtml('data-pref-dark', '0', 'Light', !state.darkTheme)}
+          ${prefChipHtml('data-pref-dark', '1', 'Dark', !!state.darkTheme)}
+        </div>
+        <div class="custom-select-title" style="padding:0 0 8px;">Font Size</div>
+        <div style="display:flex;gap:6px;margin-bottom:4px;">
+          ${FONT_SCALE_STEPS.map(s => prefChipHtml('data-pref-font', s.key, s.label, fsKey === s.key)).join('')}
+        </div>
+      </div>
+      <button type="button" id="preferences-close-btn" style="margin:6px 18px 18px;width:calc(100% - 36px);background:rgba(255,255,255,0.1);color:#F4F9FF;border:1px solid rgba(255,255,255,0.25);border-radius:8px;padding:12px;cursor:pointer;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.04em;font-size:calc(12px * var(--en-scale));">${t('Close')}</button>
+    `;
+    menu.querySelectorAll('[data-pref-glass]').forEach(b => b.addEventListener('click', () => {
+      setGlassTheme(b.getAttribute('data-pref-glass') === 'on');
+      draw();
+    }));
+    menu.querySelectorAll('[data-pref-dark]').forEach(b => b.addEventListener('click', () => {
+      if(!isProAccount()){
+        closePreferencesPopup();
+        openProFeatureRequiredPopup(t('Dark mode and light mode switching is a Pro feature. Upgrade to Pro to change your theme.'));
+        return;
+      }
+      setDarkTheme(b.getAttribute('data-pref-dark') === '1');
+      draw();
+    }));
+    menu.querySelectorAll('[data-pref-font]').forEach(b => b.addEventListener('click', () => {
+      setFontScale(b.getAttribute('data-pref-font'));
+      draw();
+    }));
+    document.getElementById('preferences-close-btn').addEventListener('click', closePreferencesPopup);
+  }
+  draw();
+}
+
+// Super Admin console's own hamburger menu -- same anchored-dropdown
+// pattern as openAppMenu() above, just wired to the admin console's own
+// Settings popup and logout logic instead of the main app's.
+function closeAdminMenu(){
+  document.getElementById('admin-menu-overlay')?.remove();
+  clearAnchoredDropdown();
+}
+function openAdminMenu(btn){
+  closeAdminMenu();
+  const overlay = document.createElement('div');
+  overlay.className = 'custom-select-overlay';
+  overlay.id = 'admin-menu-overlay';
+  const menu = document.createElement('div');
+  menu.className = 'custom-select-menu';
+  overlay.appendChild(menu);
+  document.body.appendChild(overlay);
+  positionAppMenu(menu, btn);
+  setAnchoredDropdown(menu, btn);
+  overlay.addEventListener('mousedown', (e) => { if(e.target === overlay) closeAdminMenu(); });
+  menu.innerHTML = `
+    <button type="button" class="custom-select-option" data-admin-menu-action="settings"><span>${t('Settings')}</span></button>
+    <button type="button" class="custom-select-option" data-admin-menu-action="logout" style="color:#FF8A80;"><span>${t('Log out')}</span></button>
+  `;
+  menu.querySelector('[data-admin-menu-action="settings"]').addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    closeAdminMenu();
+    openAdminSettingsPopup();
+  });
+  menu.querySelector('[data-admin-menu-action="logout"]').addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    closeAdminMenu();
+    state.adminAuthed = false; state.adminUsername=''; state.adminPasskey=''; state.adminOrgs=null; state.adminRequests=null; state.adminOrgDetailId=null; state.adminBlockedNumbers=null; state.adminPushSubscribed=null;
+    clearAdminSession();
+    stopAdminNotificationPolling();
+    renderAdmin();
+  });
+}
+
 // Handful of top-level elements (page <title>, header logo/brand) sit in
 // the static HTML shell outside any JS template literal, so they can't
 // use ${t(...)} inline -- this keeps them in sync on load and on toggle.
@@ -3326,6 +3619,12 @@ function getRoleTabs(){
 const DEFAULT_TAB = { owner:'dashboard', manager:'dashboard', staff:'dashboard', sender:'checkin', receiver:'track' };
 const INTERNAL_ROLES = ['owner','manager','staff'];
 
+// Glass theme + font size are device-level (not per-boat), so they're
+// applied immediately here rather than waiting on refreshData()/login --
+// this is what makes them visible on the gate/login screens too.
+applyGlassTheme(loadGlassPref());
+applyFontScale(loadFontScalePref());
+
 
 
 async function refreshData(){
@@ -3828,27 +4127,24 @@ function renderTabs(){
   }));
 
   const settingsBtn = document.getElementById('header-settings-btn');
-  const themeToggleBtn = document.getElementById('header-theme-toggle-btn');
   const hasSettingsTab = (getRoleTabs()[state.role] || []).some(tb => tb.id === 'settings');
-  if(hasSettingsTab){
-    themeToggleBtn.style.display = 'flex';
-    renderHeaderThemeToggle();
-    wireHeaderThemeToggle();
-    settingsBtn.style.display = 'flex';
-    settingsBtn.style.background = state.tab === 'settings' ? 'var(--amber)' : 'rgba(255,255,255,0.08)';
-    const svgStroke = settingsBtn.querySelector('svg');
-    if(svgStroke) svgStroke.setAttribute('stroke', state.tab === 'settings' ? 'var(--navy-deep)' : '#F4F9FF');
-    if(pendingStaffCount > 0 && !settingsBtn.querySelector('.badge')){
-      settingsBtn.style.position = 'relative';
-      settingsBtn.insertAdjacentHTML('beforeend', `<span class="badge" style="position:absolute;top:-2px;right:-2px;">${pendingStaffCount}</span>`);
-    } else if(pendingStaffCount === 0){
-      settingsBtn.querySelector('.badge')?.remove();
-    }
-    settingsBtn.onclick = () => { location.hash = (state.tab === 'settings') ? 'dashboard' : 'settings'; };
-  } else {
-    settingsBtn.style.display = 'none';
-    themeToggleBtn.style.display = 'none';
+  // The hamburger itself is shown for every role -- it's the one entry
+  // point into Preferences (theme + font size) now, which every end of the
+  // app gets, not just roles that also have a Settings tab. renderTabs()
+  // still keeps header-theme-toggle-btn's own state current in the
+  // background (it's just never shown -- see the CSS override above) so
+  // openAppMenu()'s Preferences panel can read isProAccount()/state.darkTheme
+  // straight from it without recomputing anything.
+  renderHeaderThemeToggle();
+  settingsBtn.style.display = 'flex';
+  settingsBtn.style.background = 'rgba(255,255,255,0.08)';
+  if(hasSettingsTab && pendingStaffCount > 0 && !settingsBtn.querySelector('.badge')){
+    settingsBtn.style.position = 'relative';
+    settingsBtn.insertAdjacentHTML('beforeend', `<span class="badge" style="position:absolute;top:-2px;right:-2px;">${pendingStaffCount}</span>`);
+  } else if(!hasSettingsTab || pendingStaffCount === 0){
+    settingsBtn.querySelector('.badge')?.remove();
   }
+  settingsBtn.onclick = () => openAppMenu();
 
   const pill = document.getElementById('role-pill');
   if(state.entryMode === 'internal'){
@@ -11163,8 +11459,9 @@ function renderAdminDashboard(){
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <h2 style="margin:0;">Super Admin</h2>
           <div style="display:flex;gap:8px;">
-            <button class="btn btn-ghost" id="admin-settings-btn" title="Settings" style="padding:8px 12px;">\u2699\ufe0f</button>
-            <button class="btn btn-ghost" id="admin-logout-btn">${t("Log out")}</button>
+            <button type="button" id="admin-menu-btn" title="Menu" style="background:rgba(11,72,124,0.08);border:none;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--navy-deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+            </button>
           </div>
         </div>
         <div class="sub-tabs">
@@ -11184,14 +11481,8 @@ function renderAdminDashboard(){
       </div>
     </div>
   `;
-  document.getElementById('admin-settings-btn').addEventListener('click', () => {
-    openAdminSettingsPopup();
-  });
-  document.getElementById('admin-logout-btn').addEventListener('click', () => {
-    state.adminAuthed = false; state.adminUsername=''; state.adminPasskey=''; state.adminOrgs=null; state.adminRequests=null; state.adminOrgDetailId=null; state.adminBlockedNumbers=null; state.adminPushSubscribed=null;
-    clearAdminSession();
-    stopAdminNotificationPolling();
-    renderAdmin();
+  document.getElementById('admin-menu-btn').addEventListener('click', (e) => {
+    openAdminMenu(e.currentTarget);
   });
   area.querySelectorAll('[data-admintab]').forEach(b => b.addEventListener('click', () => {
     state.adminTab = b.dataset.admintab;
