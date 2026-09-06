@@ -182,6 +182,24 @@ CREATE INDEX IF NOT EXISTS pro_payments_reference_idx ON pro_payments (reference
 CREATE UNIQUE INDEX IF NOT EXISTS pro_payments_swipe_payment_id_idx ON pro_payments (swipe_payment_id);
 
 -- ---------------------------------------------------------------------------
+-- external_swipe_references: references registered by another app sharing
+-- this Swipe client/wallet (currently just Maldexpress, source='maldexpress'),
+-- so POST /api/webhooks/swipe below knows to forward that event instead of
+-- processing it as one of SeaFare's own payments. Registered via POST
+-- /api/internal/register-swipe-reference before the other app's payment
+-- link is ever shown to its user, so a webhook can never arrive before the
+-- row does. `reference` holds whatever identifier that app registered --
+-- for Maldexpress this is Swipe's transaction_id, for the same reason
+-- pro_payments keys on swipe_payment_id rather than the sometimes-absent
+-- transaction_code/reference field.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS external_swipe_references (
+  reference      TEXT PRIMARY KEY,
+  source         TEXT NOT NULL,
+  registered_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- ---------------------------------------------------------------------------
 -- admin_notifications: the Super Admin's notification queue (new signups,
 -- new boats, pending boat requests, Pro requests, Swipe payments, and
 -- re-signups of a previously-deleted mobile number). reference_type /
