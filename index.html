@@ -279,6 +279,7 @@
      language. openAppMenu()'s positionAppMenu() reads the button's live
      getBoundingClientRect(), so the menu still anchors correctly under it
      with no JS changes. */
+  header.app-head #header-search-btn,
   header.app-head #header-settings-btn{
     flex-shrink:0;
     /* Belt-and-suspenders alongside the inline style on the button itself
@@ -295,6 +296,9 @@
     -webkit-tap-highlight-color:transparent;
     outline:none;
   }
+  header.app-head #header-search-btn:hover,
+  header.app-head #header-search-btn:active,
+  header.app-head #header-search-btn:focus,
   header.app-head #header-settings-btn:hover,
   header.app-head #header-settings-btn:active,
   header.app-head #header-settings-btn:focus{
@@ -1257,6 +1261,7 @@
     header.app-head #clock,
     header.app-head .role-pill,
     header.app-head #header-theme-toggle-btn,
+    header.app-head #header-search-btn,
     header.app-head #header-settings-btn,
     header.app-head #pro-badge{
       opacity:calc(1 - var(--tp, 0));
@@ -1644,6 +1649,11 @@ body.admin-mode{
         <span id="clock">--</span>
       </div>
     </div>
+    <button type="button" id="header-search-btn" title="Search" style="display:none;background:none;border:none;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;padding:0;">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F4F9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </button>
     <button type="button" id="header-settings-btn" title="Menu" style="display:none;background:none;border:none;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;padding:0;">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F4F9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
@@ -3803,6 +3813,7 @@ function renderGate(){
   document.getElementById('panel').style.display='none';
   document.getElementById('role-pill').style.display='none';
   document.getElementById('header-theme-toggle-btn').style.display='none';
+  document.getElementById('header-search-btn').style.display='none';
   document.getElementById('header-settings-btn').style.display='none';
   document.getElementById('gate-area').style.display='block';
   document.body.classList.remove('plan-choice-screen');
@@ -4276,7 +4287,6 @@ function renderTabs(){
   // straight from it without recomputing anything.
   renderHeaderThemeToggle();
   settingsBtn.style.display = 'flex';
-  settingsBtn.style.background = 'rgba(255,255,255,0.08)';
   if(hasSettingsTab && pendingStaffCount > 0 && !settingsBtn.querySelector('.badge')){
     settingsBtn.style.position = 'relative';
     settingsBtn.insertAdjacentHTML('beforeend', `<span class="badge" style="position:absolute;top:-2px;right:-2px;">${pendingStaffCount}</span>`);
@@ -4284,6 +4294,38 @@ function renderTabs(){
     settingsBtn.querySelector('.badge')?.remove();
   }
   settingsBtn.onclick = () => openAppMenu();
+
+  // The header search icon only ever shows on a screen that already has
+  // its own real "search this list" box built into the page (Dashboard's
+  // "Search all shipments" field, the Track tab's tracking-code search) --
+  // never on screens whose only text inputs are inline pickers like "type
+  // to search & add an island" on New Trip / Add Customer, which filter a
+  // small fixed list as you type rather than searching the boat's actual
+  // data. Tapping it just scrolls that page's existing box into view and
+  // focuses it (which is what brings up the on-screen keyboard) instead of
+  // opening some separate search UI of its own.
+  const headerSearchBtn = document.getElementById('header-search-btn');
+  const TAB_SEARCH_INPUT_ID = { dashboard: 'dash-search-input', track: 'track-input' };
+  const searchInputId = TAB_SEARCH_INPUT_ID[state.tab];
+  if(searchInputId){
+    headerSearchBtn.style.display = 'flex';
+    headerSearchBtn.onclick = () => {
+      // Dashboard hides its search box while a single searched-for
+      // shipment is open (see renderDashboard) -- back out of that first
+      // so there's actually a box on screen to focus.
+      if(state.tab === 'dashboard' && state.dashSearchOpenId){
+        state.dashSearchOpenId = null;
+        renderDashboard();
+      }
+      const input = document.getElementById(searchInputId);
+      if(!input) return;
+      input.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      input.focus();
+    };
+  } else {
+    headerSearchBtn.style.display = 'none';
+    headerSearchBtn.onclick = null;
+  }
 
   const pill = document.getElementById('role-pill');
   if(state.entryMode === 'internal'){
@@ -10689,6 +10731,7 @@ function hideNormalShell(){
   document.getElementById('panel').style.display = 'none';
   document.getElementById('role-pill').style.display = 'none';
   document.getElementById('header-theme-toggle-btn').style.display = 'none';
+  document.getElementById('header-search-btn').style.display = 'none';
   document.getElementById('header-settings-btn').style.display = 'none';
   document.getElementById('gate-area').style.display = 'block';
   document.getElementById('gate-area').classList.remove('admin-shell');
