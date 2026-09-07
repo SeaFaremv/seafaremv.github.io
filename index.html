@@ -558,9 +558,12 @@
      under whichever field opened it, matching that field's width, with
      the field itself scrolled to the top of the screen first so there's
      room for the list (and the keyboard, for the search fields) below it.
-     The panel is a translucent frosted-glass layer over whatever's behind
-     it, rather than a solid block, so the animated background is still
-     visible, just softened, through it. */
+     Built from the same light "paper" card + soft wave texture as every
+     .panel in the app (rather than a dark navy card that stood out from
+     everything else) so it reads as the same app, just floating -- and
+     since it's built from theme variables (--paper/--ink/etc, which
+     already have their own dark-mode values), it automatically follows
+     dark mode too instead of being permanently one fixed color. */
   .custom-select-overlay{
     position:fixed;inset:0;z-index:2200;background:transparent;
   }
@@ -572,64 +575,59 @@
        this keeps the picker's look and behavior identical in Dhivehi
        instead of mirroring the day columns or the hour/minute list. */
     direction:ltr;
-    background:rgba(11,72,124,0.88);
-    background-image:
-      radial-gradient(circle at 10% 0%, rgba(255,255,255,0.05), transparent 40%),
-      radial-gradient(circle at 90% 100%, rgba(255,255,255,0.04), transparent 40%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='70'%3E%3Cpath d='M0,35 Q35,10 70,35 T140,35' stroke='rgba(255,255,255,0.05)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0,55 Q35,30 70,55 T140,55' stroke='rgba(255,255,255,0.06)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0,15 Q35,-10 70,15 T140,15' stroke='rgba(255,255,255,0.035)' stroke-width='1' fill='none'/%3E%3C/svg%3E");
-    background-repeat:no-repeat,no-repeat,repeat;
-    background-position:0 0,0 0,0 0;
-    background-size:auto,auto,140px 70px;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='70'%3E%3Cpath d='M0,35 Q35,10 70,35 T140,35' stroke='rgba(11,114,196,0.05)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0,55 Q35,30 70,55 T140,55' stroke='rgba(0,191,165,0.05)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0,15 Q35,-10 70,15 T140,15' stroke='rgba(11,114,196,0.03)' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-repeat:repeat;background-size:140px 70px;
     backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     border-radius:14px;
-    border:1px solid rgba(255,255,255,0.18);
-    box-shadow:0 14px 32px rgba(0,0,0,0.35);
+    border:1.5px solid var(--line);
+    box-shadow:0 14px 32px rgba(15,35,55,0.22);
     animation:select-menu-in 0.15s ease;
   }
   @keyframes select-menu-in{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:translateY(0); } }
   .custom-select-title{
     font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.04em;font-size:calc(12px * var(--en-scale));
-    color:rgba(244,249,255,0.7);padding:12px 18px 8px;
+    color:var(--ink-soft);padding:12px 18px 8px;
   }
   .custom-select-option{
     display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
     background:transparent;border:none;text-align:left;
-    padding:13px 18px;font-family:'Inter',sans-serif;font-size:calc(15px * var(--en-scale));color:#F4F9FF;
-    border-bottom:1px solid rgba(255,255,255,0.12);cursor:pointer;
+    padding:13px 18px;font-family:'Inter',sans-serif;font-size:calc(15px * var(--en-scale));color:var(--ink);
+    border-bottom:1px solid var(--line);cursor:pointer;-webkit-tap-highlight-color:transparent;
   }
   .custom-select-option:last-child{border-bottom:none;}
-  .custom-select-option:active{background:rgba(255,255,255,0.14);}
-  .custom-select-option.selected{color:var(--amber);font-weight:600;}
+  .custom-select-option:active{background:var(--paper-dark);}
+  .custom-select-option.selected{color:#B8791A;font-weight:600;}
   .custom-select-option:disabled{opacity:0.45;}
-  .custom-select-option svg{color:var(--amber);flex-shrink:0;}
+  .custom-select-option svg{color:#B8791A;flex-shrink:0;}
 
   /* Themed replacement for the native OS date-picker calendar (same
      limitation as <select> -- an OS-drawn overlay CSS can't reach), built
-     on the same frosted-glass panel as the dropdowns above. The selected
-     day gets a soft/light fill rather than a bold, saturated one. */
+     on the same light card as the dropdowns above. The selected day gets
+     a soft/light fill rather than a bold, saturated one. */
   .date-picker-menu{padding:14px 16px 12px;}
   .dp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-  .dp-month{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.04em;font-size:calc(13.5px * var(--en-scale));color:#F4F9FF;}
-  .dp-nav-btn{background:rgba(255,255,255,0.1);border:none;color:#F4F9FF;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:calc(16px * var(--en-scale));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .dp-nav-btn:active{background:rgba(255,255,255,0.2);}
+  .dp-month{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.04em;font-size:calc(13.5px * var(--en-scale));color:var(--ink);}
+  .dp-nav-btn{background:var(--paper-dark);border:none;color:var(--navy-deep);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:calc(16px * var(--en-scale));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .dp-nav-btn:active{background:var(--line);}
   .dp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
-  .dp-weekdays span{text-align:center;font-size:calc(10px * var(--en-scale));color:rgba(244,249,255,0.5);text-transform:uppercase;letter-spacing:0.03em;}
+  .dp-weekdays span{text-align:center;font-size:calc(10px * var(--en-scale));color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.03em;}
   .dp-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-  .dp-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:#F4F9FF;font-size:calc(13.5px * var(--en-scale));border-radius:8px;cursor:pointer;}
-  .dp-day:active{background:rgba(255,255,255,0.14);}
+  .dp-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:var(--ink);font-size:calc(13.5px * var(--en-scale));border-radius:8px;cursor:pointer;}
+  .dp-day:active{background:var(--paper-dark);}
   .dp-day:disabled{visibility:hidden;}
-  .dp-day.dp-today{outline:1.5px solid rgba(64,217,192,0.55);outline-offset:-1.5px;}
-  .dp-day.dp-selected{background:rgba(255,167,38,0.3);color:#FFF3E0;font-weight:700;}
-  .dp-footer{display:flex;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.12);}
-  .dp-footer button{background:none;border:none;color:var(--teal-light);font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.04em;font-size:calc(11.5px * var(--en-scale));cursor:pointer;padding:6px 4px;}
+  .dp-day.dp-today{outline:1.5px solid var(--teal);outline-offset:-1.5px;}
+  .dp-day.dp-selected{background:rgba(255,167,38,0.28);color:#8a5a00;font-weight:700;}
+  .dp-footer{display:flex;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);}
+  .dp-footer button{background:none;border:none;color:var(--navy-deep);font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.04em;font-size:calc(11.5px * var(--en-scale));cursor:pointer;padding:6px 4px;}
 
   /* Themed replacement for the native OS time-picker wheel -- same
-     limitation and same frosted-glass panel as the calendar above. Built
-     as a real spinning-wheel picker (iOS-style): three scroll-snapping
-     columns (hour/minute/AM-PM) behind one fixed amber highlight band
-     across the middle row. Rows fade out toward the top/bottom edges via
-     a mask, and shrink/dim the further they scroll from center, instead
-     of the flat button list this used to be. */
+     limitation and same light card as the calendar above. Built as a real
+     spinning-wheel picker (iOS-style): three scroll-snapping columns
+     (hour/minute/AM-PM) behind one fixed amber highlight band across the
+     middle row. Rows fade out toward the top/bottom edges via a mask, and
+     shrink/dim the further they scroll from center, instead of the flat
+     button list this used to be. */
   .time-picker-menu{padding:14px 16px 12px;}
   .tp-wheel{position:relative;}
   .tp-highlight{
@@ -653,35 +651,30 @@
   .tp-item{
     height:var(--tp-row-h);display:flex;align-items:center;justify-content:center;
     scroll-snap-align:center;cursor:pointer;user-select:none;-webkit-user-select:none;
-    font-family:'JetBrains Mono',monospace;color:rgba(244,249,255,0.4);
+    font-family:'JetBrains Mono',monospace;color:var(--ink-soft);
     font-size:calc(15px * var(--en-scale));font-weight:500;
     transition:color 0.12s ease,font-size 0.12s ease,opacity 0.12s ease;
   }
-  .tp-item.tp-center{color:#FFF3E0;font-weight:700;font-size:calc(19px * var(--en-scale));}
+  .tp-item.tp-center{color:#8a5a00;font-weight:700;font-size:calc(19px * var(--en-scale));}
 
-  /* Same frosted-glass wave pattern as the dropdowns/calendar, used for
-     centered modal popups (like the staff-PIN share sheet) rather than
-     anchored ones -- just a static centered panel instead of one pinned
-     under a field. */
+  /* Same light card + soft wave texture as the dropdowns/calendar, used
+     for centered modal popups (like the staff-PIN share sheet) rather
+     than anchored ones -- just a static centered panel instead of one
+     pinned under a field. */
   .themed-modal-panel{
-    width:100%;max-width:340px;color:#F4F9FF;
-    background:rgba(11,72,124,0.88);
-    background-image:
-      radial-gradient(circle at 10% 0%, rgba(255,255,255,0.05), transparent 40%),
-      radial-gradient(circle at 90% 100%, rgba(255,255,255,0.04), transparent 40%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='70'%3E%3Cpath d='M0,35 Q35,10 70,35 T140,35' stroke='rgba(255,255,255,0.05)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0,55 Q35,30 70,55 T140,55' stroke='rgba(255,255,255,0.06)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0,15 Q35,-10 70,15 T140,15' stroke='rgba(255,255,255,0.035)' stroke-width='1' fill='none'/%3E%3C/svg%3E");
-    background-repeat:no-repeat,no-repeat,repeat;
-    background-position:0 0,0 0,0 0;
-    background-size:auto,auto,140px 70px;
+    width:100%;max-width:340px;color:var(--ink);
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='70'%3E%3Cpath d='M0,35 Q35,10 70,35 T140,35' stroke='rgba(11,114,196,0.05)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0,55 Q35,30 70,55 T140,55' stroke='rgba(0,191,165,0.05)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0,15 Q35,-10 70,15 T140,15' stroke='rgba(11,114,196,0.03)' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-repeat:repeat;background-size:140px 70px;
     backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     border-radius:16px;
-    border:1px solid rgba(255,255,255,0.18);
-    box-shadow:0 14px 32px rgba(0,0,0,0.35);
+    border:1.5px solid var(--line);
+    box-shadow:0 14px 32px rgba(15,35,55,0.22);
     padding:22px 20px;
     animation:select-menu-in 0.15s ease;
   }
-  .themed-modal-panel h3{color:#F4F9FF;margin:0 0 8px;}
-  .themed-modal-panel .sub{color:rgba(244,249,255,0.7);}
+  .themed-modal-panel h3{color:var(--navy-deep);margin:0 0 8px;}
+  .themed-modal-panel .sub{color:var(--ink-soft);}
 
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:7px;
@@ -734,6 +727,66 @@
   .status-in_transit{background:#DCEBFC;color:#1C5FA8;}
   .status-arrived{background:#DAF7EA;color:#12915F;}
   .status-delivered{background:#DFF7EC;color:#22A366;}
+  /* Home's "active trip" hero card (see renderActiveTripSummary) -- a
+     gradient card deliberately distinct from every other .tag-styled
+     shipment card on the page, since this is the one thing on Home that
+     always matters most right now (what the active trip is doing).
+     Same tap target/behavior as before (data-open-trip-popup, opens
+     openTripDetailsPopup), only the look changed. */
+  .trip-hero-card{
+    position:relative;cursor:pointer;margin-bottom:16px;padding:18px 20px 16px;
+    border-radius:16px;color:#fff;overflow:hidden;
+    background:linear-gradient(135deg, var(--navy-mid), var(--navy-deep) 70%);
+    box-shadow:0 10px 24px rgba(11,114,196,0.28);
+  }
+  .trip-hero-card:active{opacity:0.92;}
+  .trip-hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px;}
+  .trip-hero-icon{
+    width:36px;height:36px;border-radius:50%;flex-shrink:0;
+    background:rgba(255,255,255,0.16);display:flex;align-items:center;justify-content:center;
+  }
+  .trip-hero-icon svg{width:18px;height:18px;stroke:#fff;}
+  .trip-hero-status-col{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+  .trip-hero-pill{
+    font-family:'JetBrains Mono',monospace;font-size:calc(9.5px * var(--en-scale));letter-spacing:0.08em;text-transform:uppercase;
+    padding:4px 10px;border-radius:20px;font-weight:700;white-space:nowrap;background:rgba(255,255,255,0.9);
+  }
+  .trip-hero-pill.is-pending{color:#B8791A;}
+  .trip-hero-pill.is-active{color:#1A8F63;}
+  .trip-hero-pill.is-transit{color:#1C5FA8;}
+  .trip-hero-pill.is-arrived{color:#12915F;}
+  .trip-hero-route{
+    font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:0.01em;
+    font-size:calc(15.5px * var(--en-scale));line-height:1.35;margin-bottom:4px;
+  }
+  .trip-hero-meta{font-size:calc(11.5px * var(--en-scale));color:rgba(255,255,255,0.8);margin-bottom:14px;}
+  .trip-hero-cta{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:rgba(255,255,255,0.14);border-radius:10px;padding:10px 14px;
+    font-size:calc(12px * var(--en-scale));font-weight:600;
+  }
+  .trip-hero-cta svg{width:16px;height:16px;flex-shrink:0;}
+  /* Dashboard's search popup (see openDashboardSearchPopup) -- opens
+     anchored under the header search icon rather than centered, so it
+     reads as "dropping down from that button" like a normal search
+     flyout. positionDashboardSearchPopup() sets top/right/width in JS
+     (has to -- it depends on the button's actual on-screen position,
+     which shifts as the header collapses on scroll). */
+  .search-popup-overlay{
+    position:fixed;inset:0;z-index:1900;background:rgba(11,40,64,0.32);
+  }
+  .search-popup-panel{
+    position:fixed;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;
+    box-shadow:0 16px 40px rgba(0,0,0,0.28);padding:14px;animation:invoice-pop-in 0.15s ease-out;
+    max-height:min(420px, 70vh);overflow-y:auto;
+  }
+  .search-popup-row{display:flex;align-items:center;gap:8px;}
+  .search-popup-row input{flex:1;margin:0;}
+  .search-popup-close{
+    background:none;border:none;font-size:22px;line-height:1;color:var(--ink-soft);cursor:pointer;
+    width:32px;height:32px;flex-shrink:0;-webkit-appearance:none;appearance:none;
+    -webkit-tap-highlight-color:transparent;outline:none;padding:0;
+  }
   .tag-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
   .tag-items{font-size:calc(11.5px * var(--en-scale));color:var(--ink-soft);border-top:1px dashed var(--line);padding-top:8px;margin-top:2px;}
   .party-block{margin-bottom:4px;}
@@ -869,6 +922,26 @@
   }
   .sub-tabs button.active{background:var(--navy-deep);color:var(--paper);font-weight:600;}
   .sub-tabs button:not(.active):hover{background:rgba(0,0,0,0.06);color:var(--navy-deep);}
+  /* Language switch -- a small two-way segmented control, now living in
+     the hamburger menu (see openAppMenu) instead of the old single ghost
+     button that just showed the other language's name as plain text and
+     easily got lost on the Settings page. Both languages are shown
+     at once with the active one filled in, same "pill with a solid
+     active segment" language as .sub-tabs above so it reads as an
+     obvious switch rather than a low-emphasis link. */
+  .lang-switch{
+    display:flex;gap:3px;background:var(--paper-dark);border:1.5px solid var(--line);
+    padding:4px;border-radius:10px;flex-shrink:0;
+  }
+  .lang-switch-opt{
+    background:transparent;border:none;color:var(--ink-soft);cursor:pointer;
+    font-family:'Oswald',sans-serif;letter-spacing:0.03em;
+    font-size:calc(12px * var(--en-scale));font-weight:600;
+    padding:8px 14px;border-radius:7px;transition:background 0.15s, color 0.15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .lang-switch-opt.active{background:var(--navy-deep);color:#fff;box-shadow:0 2px 6px rgba(11,114,196,0.35);}
+  .lang-switch-opt:not(.active):active{background:rgba(11,114,196,0.12);}
   .staff-row{
     display:flex;flex-direction:column;gap:8px;margin-bottom:8px;
     background:var(--paper-dark);border-radius:8px;padding:8px 10px;
@@ -1649,16 +1722,18 @@ body.admin-mode{
         <span id="clock">--</span>
       </div>
     </div>
-    <button type="button" id="header-search-btn" title="Search" style="display:none;background:none;border:none;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;padding:0;">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F4F9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-    </button>
-    <button type="button" id="header-settings-btn" title="Menu" style="display:none;background:none;border:none;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;padding:0;">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F4F9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
-      </svg>
-    </button>
+    <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;">
+      <button type="button" id="header-search-btn" title="Search" style="display:none;background:none;border:none;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;padding:0;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F4F9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
+      <button type="button" id="header-settings-btn" title="Menu" style="display:none;background:none;border:none;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;padding:0;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F4F9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
+        </svg>
+      </button>
+    </div>
     <div style="display:flex;align-items:center;gap:8px;width:100%;justify-content:space-between;">
       <div class="role-pill" id="role-pill" style="display:none;">
         <span class="rlabel" id="role-label"></span>
@@ -2667,13 +2742,13 @@ function currentFontScaleKey(){
 }
 // Small pill-style chip shared by every Light/Dark/Classic/Glass/font-size
 // control in the Preferences popup -- plain inline styles rather than the
-// app's .btn/.btn-ghost classes, since those assume a light card background
-// (dark navy text) while this popup sits on the same dark translucent panel
-// as the themed dropdowns (see .custom-select-menu).
+// app's .btn/.btn-ghost classes, since those assume a light .panel-style
+// card background specifically, whereas this needs to look right sitting
+// on the lighter (but textured/blurred) .custom-select-menu card instead.
 function prefChipHtml(attr, value, label, active){
   const style = active
     ? 'background:var(--teal);color:#08202F;font-weight:700;border:none;'
-    : 'background:rgba(255,255,255,0.08);color:#F4F9FF;border:1px solid rgba(255,255,255,0.18);';
+    : 'background:var(--paper-dark);color:var(--ink);border:1px solid var(--line);';
   return `<button type="button" ${attr}="${value}" style="flex:1;padding:10px 4px;border-radius:8px;cursor:pointer;font-family:'Oswald',sans-serif;letter-spacing:0.03em;text-transform:uppercase;font-size:calc(10.5px * var(--en-scale));${style}">${label}</button>`;
 }
 
@@ -2691,11 +2766,29 @@ function closeAppMenu(){
 function positionAppMenu(menu, btn){
   const r = btn.getBoundingClientRect();
   const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
-  const width = Math.min(260, window.innerWidth - 16);
+  const vw = document.documentElement.clientWidth || window.innerWidth;
+  const width = Math.min(260, vw - 16);
   menu.style.width = width + 'px';
-  menu.style.left = Math.max(8, Math.min(r.right - width, window.innerWidth - width - 8)) + 'px';
+  menu.style.right = 'auto';
+  menu.style.left = Math.max(8, Math.min(r.right - width, vw - width - 8)) + 'px';
   menu.style.top = (r.bottom + 8) + 'px';
   menu.style.maxHeight = Math.max(160, vh - (r.bottom + 8) - 10) + 'px';
+}
+// Jumps straight to a specific Settings section (used by the Customers/
+// Reports menu items, now that they're not tiles on the Settings page
+// itself anymore -- see renderSettings). Setting the hash is what
+// actually triggers navigation/render normally, but that only fires a
+// hashchange event when the hash's value actually changes -- if someone's
+// already sitting on Settings (hash is already "#settings") and taps
+// Reports from the menu, assigning the same hash again would silently do
+// nothing, so that case re-renders directly instead.
+function navigateToSettingsSubtab(subtab){
+  state.settingsTab = subtab;
+  if((location.hash || '').replace('#','') === 'settings'){
+    render();
+  } else {
+    location.hash = 'settings';
+  }
 }
 function openAppMenu(){
   closeAppMenu();
@@ -2710,24 +2803,46 @@ function openAppMenu(){
   overlay.appendChild(menu);
   document.body.appendChild(overlay);
   positionAppMenu(menu, btn);
-  setAnchoredDropdown(menu, btn);
+  setAnchoredDropdown(menu, btn, positionAppMenu);
   overlay.addEventListener('mousedown', (e) => { if(e.target === overlay) closeAppMenu(); });
 
   const hasSettingsTab = (getRoleTabs()[state.role] || []).some(tb => tb.id === 'settings');
   const isInternal = state.entryMode === 'internal';
+  const isManager = state.role === 'manager';
   let nameHtml = '';
   if(isInternal && getRoles()[state.role]){
     const roleText = getRoles()[state.role].name + (state.staffName ? ' \u00b7 ' + state.staffName : '');
     const boatName = _boatNameCache[CURRENT_BOAT_ID] || '';
-    nameHtml = `<div class="custom-select-title" style="text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-size:calc(13.5px * var(--en-scale));color:#F4F9FF;padding:14px 18px 10px;">${escapeHtml([boatName, roleText].filter(Boolean).join(' \u00b7 '))}</div>`;
+    nameHtml = `<div class="custom-select-title" style="text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-size:calc(13.5px * var(--en-scale));color:var(--ink-soft);padding:14px 18px 10px;">${escapeHtml([boatName, roleText].filter(Boolean).join(' \u00b7 '))}</div>`;
   }
   const items = [];
   if(hasSettingsTab){
     items.push(`<button type="button" class="custom-select-option" data-menu-action="settings"><span>${t('Settings')}</span></button>`);
+    // Customers and Reports used to be two of the tiles on the Settings
+    // page itself (see renderSettings) -- moved here instead so that grid
+    // stays to the settings someone actually tweaks occasionally, while
+    // these two (more like their own destinations than a "setting") are
+    // one tap away from anywhere in the app instead of two.
+    if(!isManager) items.push(`<button type="button" class="custom-select-option" data-menu-action="customers"><span>${t('Customers')}</span></button>`);
+    items.push(`<button type="button" class="custom-select-option" data-menu-action="reports"><span>${t('Reports')}</span></button>`);
   }
   items.push(`<button type="button" class="custom-select-option" data-menu-action="preferences"><span>${t('Preferences')}</span></button>`);
+  // Language switch -- moved in from Settings, same two-way segmented
+  // control (see .lang-switch), same Pro-gated "into Dhivehi" rule. Its
+  // active/inactive state is just computed fresh in the markup below
+  // rather than synced by a separate function, since this whole menu is
+  // rebuilt from scratch every time it opens anyway.
+  items.push(`
+    <div style="padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);">
+      <span style="font-family:'Inter',sans-serif;font-size:calc(15px * var(--en-scale));color:var(--ink);">${t('Language')}</span>
+      <div class="lang-switch" id="app-menu-lang-switch">
+        <button type="button" class="lang-switch-opt${state.lang!=='dv'?' active':''}" data-lang="en">EN</button>
+        <button type="button" class="lang-switch-opt${state.lang==='dv'?' active':''}" data-lang="dv">&#1932;&#1960;&#1928;&#1962;&#1834;&#1960;</button>
+      </div>
+    </div>
+  `);
   if(isInternal){
-    items.push(`<button type="button" class="custom-select-option" data-menu-action="logout" style="color:#FF8A80;"><span>${t('Log out')}</span></button>`);
+    items.push(`<button type="button" class="custom-select-option" data-menu-action="logout" style="color:var(--red);"><span>${t('Log out')}</span></button>`);
   }
   menu.innerHTML = nameHtml + items.join('');
   menu.querySelector('[data-menu-action="settings"]')?.addEventListener('mousedown', (e) => {
@@ -2735,6 +2850,30 @@ function openAppMenu(){
     closeAppMenu();
     location.hash = 'settings';
   });
+  menu.querySelector('[data-menu-action="customers"]')?.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    closeAppMenu();
+    navigateToSettingsSubtab('customers');
+  });
+  menu.querySelector('[data-menu-action="reports"]')?.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    closeAppMenu();
+    navigateToSettingsSubtab('reports');
+  });
+  menu.querySelectorAll('#app-menu-lang-switch [data-lang]').forEach(opt => opt.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    const switchingToDhivehi = opt.dataset.lang === 'dv';
+    if(switchingToDhivehi === (state.lang === 'dv')){ closeAppMenu(); return; } // already on this language
+    // Switching back to English is always free -- only switching into
+    // Dhivehi is the Pro-gated direction.
+    if(switchingToDhivehi && !isProAccount()){
+      closeAppMenu();
+      openProFeatureRequiredPopup(t('Using the app in Dhivehi is a Pro feature. Upgrade to Pro to switch languages.'));
+      return;
+    }
+    closeAppMenu();
+    setLang(switchingToDhivehi ? 'dv' : 'en');
+  }));
   menu.querySelector('[data-menu-action="preferences"]')?.addEventListener('mousedown', (e) => {
     e.preventDefault();
     closeAppMenu();
@@ -2798,7 +2937,7 @@ function openPreferencesPopup(){
           ${FONT_SCALE_STEPS.map(s => prefChipHtml('data-pref-font', s.key, s.label, fsKey === s.key)).join('')}
         </div>
       </div>
-      <button type="button" id="preferences-close-btn" style="margin:6px 18px 18px;width:calc(100% - 36px);background:rgba(255,255,255,0.1);color:#F4F9FF;border:1px solid rgba(255,255,255,0.25);border-radius:8px;padding:12px;cursor:pointer;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.04em;font-size:calc(12px * var(--en-scale));">${t('Close')}</button>
+      <button type="button" id="preferences-close-btn" style="margin:6px 18px 18px;width:calc(100% - 36px);background:var(--paper-dark);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:12px;cursor:pointer;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.04em;font-size:calc(12px * var(--en-scale));">${t('Close')}</button>
     `;
     menu.querySelectorAll('[data-pref-glass]').forEach(b => b.addEventListener('click', () => {
       setGlassTheme(b.getAttribute('data-pref-glass') === 'on');
@@ -2839,11 +2978,11 @@ function openAdminMenu(btn){
   overlay.appendChild(menu);
   document.body.appendChild(overlay);
   positionAppMenu(menu, btn);
-  setAnchoredDropdown(menu, btn);
+  setAnchoredDropdown(menu, btn, positionAppMenu);
   overlay.addEventListener('mousedown', (e) => { if(e.target === overlay) closeAdminMenu(); });
   menu.innerHTML = `
     <button type="button" class="custom-select-option" data-admin-menu-action="settings"><span>${t('Settings')}</span></button>
-    <button type="button" class="custom-select-option" data-admin-menu-action="logout" style="color:#FF8A80;"><span>${t('Log out')}</span></button>
+    <button type="button" class="custom-select-option" data-admin-menu-action="logout" style="color:var(--red);"><span>${t('Log out')}</span></button>
   `;
   menu.querySelector('[data-admin-menu-action="settings"]').addEventListener('mousedown', (e) => {
     e.preventDefault();
@@ -2923,13 +3062,14 @@ function setLang(lang){
     withFreshSettings(s => { s.language = state.lang; }).catch(e => console.error('Could not save language preference', e));
   }
 }
-// Only exists inside Settings now (see renderSettings) -- a no-op on every
-// other screen, including pre-login, since the button isn't in the DOM there.
-function renderLangToggle(){
-  const btn = document.getElementById('settings-lang-toggle-btn');
-  if(!btn) return;
-  btn.textContent = state.lang === 'dv' ? 'English' : 'ދިވެހި';
-  btn.title = state.lang === 'dv' ? 'Switch to English' : 'Switch to Dhivehi';
+function isFirstDaySinceSignup(){
+  const createdAt = state.settings && state.settings.boatCreatedAt;
+  if(!createdAt) return false;
+  const created = new Date(createdAt);
+  const now = new Date();
+  return created.getFullYear() === now.getFullYear() &&
+         created.getMonth() === now.getMonth() &&
+         created.getDate() === now.getDate();
 }
 // Shows/hides the small "PRO" badge on the header's app name -- called
 // from render() (so it's current on every tab switch and on the settings
@@ -4296,28 +4436,24 @@ function renderTabs(){
   settingsBtn.onclick = () => openAppMenu();
 
   // The header search icon only ever shows on a screen that already has
-  // its own real "search this list" box built into the page (Dashboard's
-  // "Search all shipments" field, the Track tab's tracking-code search) --
-  // never on screens whose only text inputs are inline pickers like "type
-  // to search & add an island" on New Trip / Add Customer, which filter a
-  // small fixed list as you type rather than searching the boat's actual
-  // data. Tapping it just scrolls that page's existing box into view and
-  // focuses it (which is what brings up the on-screen keyboard) instead of
-  // opening some separate search UI of its own.
+  // its own real "search this list" feature (Dashboard's shipment search,
+  // the Track tab's tracking-code search) -- never on screens whose only
+  // text inputs are inline pickers like "type to search & add an island"
+  // on New Trip / Add Customer, which filter a small fixed list as you
+  // type rather than searching the boat's actual data.
+  // Dashboard's search now opens as its own popup (see
+  // openDashboardSearchPopup) instead of a box permanently taking up
+  // space on the page. Track's search box IS the whole point of that
+  // page though, so it stays as-is -- tapping the icon there just
+  // scrolls/focuses it, same as before.
   const headerSearchBtn = document.getElementById('header-search-btn');
-  const TAB_SEARCH_INPUT_ID = { dashboard: 'dash-search-input', track: 'track-input' };
-  const searchInputId = TAB_SEARCH_INPUT_ID[state.tab];
-  if(searchInputId){
+  if(state.tab === 'dashboard'){
+    headerSearchBtn.style.display = 'flex';
+    headerSearchBtn.onclick = () => openDashboardSearchPopup();
+  } else if(state.tab === 'track'){
     headerSearchBtn.style.display = 'flex';
     headerSearchBtn.onclick = () => {
-      // Dashboard hides its search box while a single searched-for
-      // shipment is open (see renderDashboard) -- back out of that first
-      // so there's actually a box on screen to focus.
-      if(state.tab === 'dashboard' && state.dashSearchOpenId){
-        state.dashSearchOpenId = null;
-        renderDashboard();
-      }
-      const input = document.getElementById(searchInputId);
+      const input = document.getElementById('track-input');
       if(!input) return;
       input.scrollIntoView({ block: 'center', behavior: 'smooth' });
       input.focus();
@@ -4400,23 +4536,33 @@ function renderActiveTripStrip(trip){
 // Compact version shown directly on Home -- route + status only, tap to
 // open the full card (arrival dropdown, Mark In Transit/Finished, GPS
 // tracking, announcement) as a popup instead of taking up permanent
-// space in the shipments list above the fold.
+// space in the shipments list above the fold. Styled as its own distinct
+// "hero" card (gradient navy background) rather than reusing the plain
+// dashed .tag look every shipment card uses -- this is the one thing on
+// Home that always matters most (what's the active trip doing right
+// now), so it's meant to read as a different, higher-priority kind of
+// card at a glance. Same data-open-trip-popup click target and same
+// status-label logic as before -- only the markup/styling changed.
 function renderActiveTripSummary(trip){
-  const statusClass = trip.departed ? 'status-in_transit' : (trip.active ? 'status-delivered' : 'status-pending');
+  const statusClass = trip.departed ? 'is-transit' : (trip.active ? 'is-active' : 'is-pending');
   const statusLabel = trip.departed ? 'In Transit' : (trip.active ? 'Active' : 'Not Yet Active');
   return `
-    <div class="tag" id="trip-summary-banner" data-open-trip-popup="${trip.id}" style="margin-bottom:16px;cursor:pointer;">
-      <div class="tag-top">
-        <div class="tag-top-main">
-          <div class="tag-code">${escapeHtml(trip.origin)} \u2192 ${escapeHtml((trip.destinations||[]).join(', '))}</div>
-          <div class="tag-meta">${fmtDMY(trip.date)} \u00b7 Load ${escapeHtml(trip.loadingTime||'--:--')} \u00b7 Depart ${escapeHtml(trip.departureTime||'--:--')}</div>
+    <div class="trip-hero-card" id="trip-summary-banner" data-open-trip-popup="${trip.id}">
+      <div class="trip-hero-top">
+        <div class="trip-hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l1.5-6h15L21 17"/><path d="M5 17v2a1 1 0 001 1h12a1 1 0 001-1v-2"/><path d="M12 3v8"/><path d="M8 6l4-3 4 3"/></svg>
         </div>
-        <div class="tag-status-col">
-          <span class="status-pill ${statusClass}">${statusLabel}</span>
-          ${trip.arrivedIsland ? `<span class="status-pill status-arrived">Boat Arrived ${escapeHtml(trip.arrivedIsland)}</span>` : ''}
+        <div class="trip-hero-status-col">
+          <span class="trip-hero-pill ${statusClass}">${statusLabel}</span>
+          ${trip.arrivedIsland ? `<span class="trip-hero-pill is-arrived">Boat Arrived ${escapeHtml(trip.arrivedIsland)}</span>` : ''}
         </div>
       </div>
-      <div class="tag-meta" style="margin-top:8px;color:var(--navy-deep);font-weight:600;">${t('Tap for trip details & actions')} \u2192</div>
+      <div class="trip-hero-route">${escapeHtml(trip.origin)} \u2192 ${escapeHtml((trip.destinations||[]).join(', '))}</div>
+      <div class="trip-hero-meta">${fmtDMY(trip.date)} \u00b7 Load ${escapeHtml(trip.loadingTime||'--:--')} \u00b7 Depart ${escapeHtml(trip.departureTime||'--:--')}</div>
+      <div class="trip-hero-cta">
+        <span>${t('Tap for trip details & actions')}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+      </div>
     </div>
   `;
 }
@@ -4530,6 +4676,88 @@ function wireActiveTripStripEvents(){
     stopGpsTracking();
     renderDashboard();
   });
+}
+
+// Dashboard's shipment search -- now lives entirely in a popup opened
+// from the header search icon (see header-search-btn in renderTabs())
+// instead of a permanent box on the page. Same matching logic and same
+// "tap a result to open just that shipment" behavior as before
+// (state.dashSearchQuery / state.dashSearchOpenId) -- only where the
+// input+results actually live changed.
+function closeDashboardSearchPopup(){
+  const overlay = document.getElementById('dashboard-search-popup-overlay');
+  if(overlay) unlockBodyScroll();
+  overlay?.remove();
+}
+function positionDashboardSearchPopup(){
+  const panel = document.getElementById('dashboard-search-popup-panel');
+  const btn = document.getElementById('header-search-btn');
+  if(!panel || !btn) return;
+  const r = btn.getBoundingClientRect();
+  const vw = window.innerWidth;
+  const width = Math.min(380, vw - 24);
+  panel.style.width = width + 'px';
+  panel.style.top = Math.max(8, r.bottom + 8) + 'px';
+  let right = Math.max(12, vw - r.right);
+  if(right + width > vw - 12) right = Math.max(12, vw - width - 12);
+  panel.style.right = right + 'px';
+}
+function openDashboardSearchPopup(){
+  closeDashboardSearchPopup();
+  lockBodyScroll();
+  const overlay = document.createElement('div');
+  overlay.id = 'dashboard-search-popup-overlay';
+  overlay.className = 'search-popup-overlay';
+  overlay.innerHTML = `
+    <div class="search-popup-panel" id="dashboard-search-popup-panel">
+      <div class="search-popup-row">
+        <input type="text" id="dash-search-input" placeholder="${t("e.g. Ahmed, 7712345, CF-260801-91H9")}" value="${escapeHtml(state.dashSearchQuery||'')}" autocomplete="off">
+        <button type="button" class="search-popup-close" id="dashboard-search-popup-close-btn" aria-label="${t('Close')}">&times;</button>
+      </div>
+      <div id="dash-search-results"></div>
+    </div>
+  `;
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeDashboardSearchPopup(); });
+  document.body.appendChild(overlay);
+  positionDashboardSearchPopup();
+  document.getElementById('dashboard-search-popup-close-btn').addEventListener('click', closeDashboardSearchPopup);
+
+  const searchInput = document.getElementById('dash-search-input');
+  const renderSearchResults = () => {
+    const resultsEl = document.getElementById('dash-search-results');
+    if(!resultsEl) return;
+    const q = (state.dashSearchQuery||'').trim().toLowerCase();
+    if(!q){ resultsEl.innerHTML = ''; return; }
+    const matches = state.shipments.filter(s =>
+      (s.name||'').toLowerCase().includes(q) ||
+      (s.mobile||'').toLowerCase().includes(q) ||
+      (s.receiverName||'').toLowerCase().includes(q) ||
+      (s.receiverMobile||'').toLowerCase().includes(q) ||
+      (s.id||'').toLowerCase().includes(q)
+    ).slice(0, 30);
+    resultsEl.innerHTML = matches.length === 0 ? `<div class="empty" style="margin-top:10px;">${t("No matches.")}</div>` : `
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;">
+        ${matches.map(s => `
+          <button type="button" class="item-result-row" data-search-open="${s.id}" style="width:100%;text-align:left;">
+            <span>${escapeHtml(s.name)} \u2192 ${escapeHtml(s.receiverName||'')}</span>
+            <span class="rprice">${escapeHtml(s.island||'')}</span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+    resultsEl.querySelectorAll('[data-search-open]').forEach(b => b.addEventListener('click', () => {
+      state.dashSearchOpenId = b.dataset.searchOpen;
+      state.dashSearchQuery = '';
+      closeDashboardSearchPopup();
+      renderDashboard();
+    }));
+  };
+  searchInput.addEventListener('input', () => {
+    state.dashSearchQuery = searchInput.value;
+    renderSearchResults();
+  });
+  renderSearchResults();
+  searchInput.focus();
 }
 
 function renderDashboard(){
@@ -4676,14 +4904,6 @@ function renderDashboard(){
       ${counts.undelivered > 0 ? `<span class="filter-chip ${state.filter==='undelivered'?'active':''}" data-f="undelivered" style="border-color:var(--red);color:var(--red);">Undelivered (${counts.undelivered})</span>` : ''}
     </div>
 
-    ${!state.dashSearchOpenId ? `
-      <div class="settings-block" style="margin-bottom:16px;">
-        <label>${t("Search all shipments — name, mobile, or tracking code")}</label>
-        <input type="text" id="dash-search-input" placeholder="${t("e.g. Ahmed, 7712345, CF-260801-91H9")}" value="${escapeHtml(state.dashSearchQuery||'')}">
-        <div id="dash-search-results"></div>
-      </div>
-    ` : ''}
-
     ${(!state.dashSearchQuery && !state.dashSearchOpenId) ? (() => {
       const islandCounts = {};
       active.forEach(s => { if(s.island){ islandCounts[s.island] = (islandCounts[s.island]||0) + 1; } });
@@ -4735,48 +4955,6 @@ function renderDashboard(){
   }));
   document.getElementById('dash-island-back-btn')?.addEventListener('click', () => { state.dashIslandView = null; renderDashboard(); });
   document.getElementById('dash-search-back-btn')?.addEventListener('click', () => { state.dashSearchOpenId = null; renderDashboard(); });
-
-  const searchInput = document.getElementById('dash-search-input');
-  const renderSearchResults = () => {
-    const resultsEl = document.getElementById('dash-search-results');
-    if(!resultsEl) return;
-    const q = (state.dashSearchQuery||'').trim().toLowerCase();
-    if(!q || state.dashSearchOpenId){ resultsEl.innerHTML = ''; return; }
-    const matches = state.shipments.filter(s =>
-      (s.name||'').toLowerCase().includes(q) ||
-      (s.mobile||'').toLowerCase().includes(q) ||
-      (s.receiverName||'').toLowerCase().includes(q) ||
-      (s.receiverMobile||'').toLowerCase().includes(q) ||
-      (s.id||'').toLowerCase().includes(q)
-    ).slice(0, 30);
-    resultsEl.innerHTML = matches.length === 0 ? `<div class="empty" style="margin-top:10px;">${t("No matches.")}</div>` : `
-      <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;">
-        ${matches.map(s => `
-          <button type="button" class="item-result-row" data-search-open="${s.id}" style="width:100%;text-align:left;">
-            <span>${escapeHtml(s.name)} \u2192 ${escapeHtml(s.receiverName||'')}</span>
-            <span class="rprice">${escapeHtml(s.island||'')}</span>
-          </button>
-        `).join('')}
-      </div>
-    `;
-    resultsEl.querySelectorAll('[data-search-open]').forEach(b => b.addEventListener('click', () => {
-      state.dashSearchOpenId = b.dataset.searchOpen;
-      state.dashSearchQuery = '';
-      renderDashboard();
-    }));
-  };
-  searchInput?.addEventListener('input', () => {
-    state.dashSearchQuery = searchInput.value;
-    if(!state.dashSearchQuery){
-      // Cleared -- back to the normal dashboard view (islands row, status
-      // filters) instead of leaving a stale empty search state showing.
-      renderDashboard();
-    } else {
-      renderSearchResults();
-    }
-  });
-  renderSearchResults();
-  
 
   document.getElementById('toggle-add-customer-btn')?.addEventListener('click', () => {
     state.addCustomerOpen = !state.addCustomerOpen;
@@ -9349,39 +9527,23 @@ function renderSettings(){
   const SETTINGS_SUBTABS = getSettingsSubtabs();
   const visibleSubtabs = isManager ? SETTINGS_SUBTABS.filter(t => MANAGER_SETTINGS_SUBTABS.includes(t.id)) : SETTINGS_SUBTABS;
   if(!visibleSubtabs.some(t => t.id === state.settingsTab)) state.settingsTab = visibleSubtabs[0].id;
-  const subtabs = visibleSubtabs.map(t =>
+  // Customers and Reports moved into the hamburger menu (see openAppMenu)
+  // instead of living as tiles here -- they're still perfectly valid
+  // values of state.settingsTab (reachable by tapping those menu items,
+  // which land here with settingsTab already set), just no longer shown
+  // as one of the grid buttons someone taps into from this page directly.
+  const gridSubtabs = visibleSubtabs.filter(t => t.id !== 'customers' && t.id !== 'reports');
+  const subtabs = gridSubtabs.map(t =>
     `<button class="${t.id===state.settingsTab?'active':''}" data-subtab="${t.id}">${t.label}</button>`
   ).join('');
   panel.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
-      <div>
-        <h2 style="margin-bottom:4px;">${t("Settings")}</h2>
-        <p class="sub" style="margin-bottom:0;">${isManager ? 'Manager access. Staff and trip settings for this boat.' : 'Owner-only. Manage staff access, item prices, and app links.'}</p>
-      </div>
-      <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;">
-        <button type="button" id="settings-lang-toggle-btn" class="btn btn-ghost" style="flex-shrink:0;"></button>
-      </div>
+    <div>
+      <h2 style="margin-bottom:4px;">${t("Settings")}</h2>
+      ${isFirstDaySinceSignup() ? `<p class="sub" style="margin-bottom:0;">${isManager ? t('Manager access. Staff and trip settings for this boat.') : t('Owner-only. Manage staff access, item prices, and app links.')}</p>` : ''}
     </div>
     <div class="sub-tabs" style="margin-top:18px;">${subtabs}</div>
     <div id="settings-body"></div>
   `;
-  renderLangToggle();
-  document.getElementById('settings-lang-toggle-btn').addEventListener('click', () => {
-    const switchingToDhivehi = state.lang !== 'dv';
-    // Switching back to English is always free -- only switching into
-    // Dhivehi is the Pro-gated direction.
-    if(switchingToDhivehi && !isProAccount()){
-      openProFeatureRequiredPopup(t('Using the app in Dhivehi is a Pro feature. Upgrade to Pro to switch languages.'));
-      return;
-    }
-    setLang(switchingToDhivehi ? 'dv' : 'en');
-    // Belt-and-suspenders: setLang() already re-renders via handleHash(),
-    // but calling renderSettings() directly here guarantees this screen
-    // (sub-tabs, labels, and whichever settings section is open) is
-    // rebuilt immediately with the new language, regardless of what hash
-    // routing decides.
-    renderSettings();
-  });
   panel.querySelectorAll('[data-subtab]').forEach(b => b.addEventListener('click', () => {
     state.settingsTab = b.dataset.subtab;
     renderSettings();
@@ -9419,7 +9581,7 @@ async function openStaffSharePanel(name, pin, staffUrl, username){
       <div style="display:flex;flex-direction:column;gap:10px;">
         <button class="btn btn-primary" id="share-whatsapp-btn" style="background:#25D366;border-color:#25D366;">${t("Share via WhatsApp")}</button>
         <button class="btn btn-primary" id="share-viber-btn" style="background:#7360F2;border-color:#7360F2;">${t("Share via Viber")}</button>
-        <button class="btn btn-ghost" id="share-close-btn" style="border-color:rgba(255,255,255,0.4);color:#F4F9FF;">${t("Cancel")}</button>
+        <button class="btn btn-ghost" id="share-close-btn" style="border-color:var(--line);color:var(--ink);">${t("Cancel")}</button>
       </div>
     </div>
   `;
@@ -9452,13 +9614,13 @@ function renderStaffManagement(){
   body.innerHTML = `
     <div class="settings-block">
       <h3>${t("Pending Access Requests")}</h3>
-      <p class="sub" style="margin-bottom:14px;">${t("Anyone with the staff link can request access on their own. They can't sign in until you approve them here and share the generated PIN.")}</p>
+      ${isFirstDaySinceSignup() ? `<p class="sub" style="margin-bottom:14px;">${t("Anyone with the staff link can request access on their own. They can't sign in until you approve them here and share the generated PIN.")}</p>` : ''}
       <div id="pending-list"></div>
     </div>
 
     <div class="settings-block">
       <h3>${t("Staff Management")}</h3>
-      <p class="sub" style="margin-bottom:14px;">${t("You can also add a staff member directly here without waiting for a request. No email is actually sent — a sign-in PIN is generated instantly for you to share with them.")}</p>
+      ${isFirstDaySinceSignup() ? `<p class="sub" style="margin-bottom:14px;">${t("You can also add a staff member directly here without waiting for a request. No email is actually sent — a sign-in PIN is generated instantly for you to share with them.")}</p>` : ''}
       <div id="staff-list"></div>
       ${(state.settings.planLimitsEnabled && (state.settings.staffUsers||[]).length >= (state.settings.isPro ? 10 : 2)) ? `
         <div class="note" style="margin-top:10px;">${state.settings.isPro ? t('You\u2019ve reached the 10-staff limit for this boat on the Pro plan.') : t('You\u2019ve reached the 2-staff limit on the Free plan. Upgrade to Pro for up to 10 per boat.')}</div>
@@ -9478,7 +9640,7 @@ function renderStaffManagement(){
     ${!isManager ? `
     <div class="settings-block">
       <h3>${t("Manager Access")}</h3>
-      <p class="sub" style="margin-bottom:14px;">${t("Give someone full run of this boat \u2014 Dashboard, Trips, Invoices, Reports, and Settings (Staff & Trip Settings only) \u2014 without letting them see or edit your account details or item prices. Only you can add or remove managers.")}</p>
+      ${isFirstDaySinceSignup() ? `<p class="sub" style="margin-bottom:14px;">${t("Give someone full run of this boat \u2014 Dashboard, Trips, Invoices, Reports, and Settings (Staff & Trip Settings only) \u2014 without letting them see or edit your account details or item prices. Only you can add or remove managers.")}</p>` : ''}
       <div id="manager-list"></div>
       <button class="btn btn-primary" id="open-manager-invite-btn" style="margin-top:10px;">${t("+ Add Manager")}</button>
     </div>
@@ -10533,7 +10695,6 @@ function renderRatesSetup(){
 /* ---------------- Main render dispatch ---------------- */
 let lastRenderedTab = null;
 function render(){
-  renderLangToggle();
   updateHeaderProBadge();
   if(state.entryMode === 'internal' && !INTERNAL_ROLES.includes(state.role)){
     renderGate();
@@ -13324,7 +13485,6 @@ function renderOrgDashboard(){
 
 /* ---------------- Routing ---------------- */
 function handleHash(){
-  renderLangToggle();
   applyStaticTranslations();
   const h = (location.hash || '').replace('#','');
   applyHomeScreenBranding(h);
@@ -13785,6 +13945,7 @@ function scrollFieldToTop(field){
 }
 let _anchoredDropdownMenu = null;
 let _anchoredDropdownField = null;
+let _anchoredDropdownPositionFn = null;
 function positionAnchoredDropdown(menu, field){
   const r = field.getBoundingClientRect();
   const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
@@ -13799,15 +13960,29 @@ function positionAnchoredDropdown(menu, field){
 // unlockBodyScroll is only called when a dropdown was actually open
 // (see the guard below), so the many defensive "close before opening a
 // new one" calls elsewhere don't unbalance the shared lock count.
-function setAnchoredDropdown(menu, field){
+// positionFn defaults to positionAnchoredDropdown (the plain "match the
+// field's own width" layout used by <select>/date/time pickers) but
+// callers with their own sizing -- openAppMenu/openAdminMenu's fixed-260px
+// hamburger menu, which is wider than the button it hangs off -- pass
+// their own (positionAppMenu) so repositionAnchoredDropdown() below
+// re-runs the SAME formula the menu was opened with, not the generic one.
+// Before this, any viewport resize (iOS's address bar collapsing/
+// expanding on scroll fires this even with no keyboard involved) while
+// the hamburger menu was open would silently reposition/resize it as if
+// it were a field-width dropdown -- shrinking it down to the button's
+// own ~38px width while its text still filled the original 260px, which
+// is exactly what "the hamburger menu looks cut off/overflowing" was.
+function setAnchoredDropdown(menu, field, positionFn){
   _anchoredDropdownMenu = menu;
   _anchoredDropdownField = field;
+  _anchoredDropdownPositionFn = positionFn || positionAnchoredDropdown;
   lockBodyScroll();
 }
 function clearAnchoredDropdown(){
   if(_anchoredDropdownMenu) unlockBodyScroll();
   _anchoredDropdownMenu = null;
   _anchoredDropdownField = null;
+  _anchoredDropdownPositionFn = null;
 }
 // The keyboard opening/closing (or the address bar showing/hiding) changes
 // how much room is actually available below the field -- re-run the same
@@ -13817,11 +13992,14 @@ function clearAnchoredDropdown(){
 // by repositionOpenPickers further down.
 function repositionAnchoredDropdown(){
   if(_anchoredDropdownMenu && _anchoredDropdownField && _anchoredDropdownMenu.isConnected){
-    positionAnchoredDropdown(_anchoredDropdownMenu, _anchoredDropdownField);
+    (_anchoredDropdownPositionFn || positionAnchoredDropdown)(_anchoredDropdownMenu, _anchoredDropdownField);
   }
 }
 if(window.visualViewport){
   window.visualViewport.addEventListener('resize', repositionAnchoredDropdown);
+  window.visualViewport.addEventListener('resize', () => {
+    if(document.getElementById('dashboard-search-popup-overlay')) positionDashboardSearchPopup();
+  });
 }
 
 function openCustomSelectMenu(select){
@@ -14193,7 +14371,7 @@ function openIslandSearchPopup(input, onPick, opts){
       const matches = flatIslandList().filter(x => x.island.toLowerCase().includes(q));
       menu.innerHTML = matches.length ? matches.slice(0, 60).map(x => `
         <button type="button" class="custom-select-option" data-pick-island="${escapeHtml(x.island)}">
-          <span>${escapeHtml(x.island)}</span><span style="color:rgba(244,249,255,0.55);font-size:calc(12.5px * var(--en-scale));">${escapeHtml(x.atoll)}</span>
+          <span>${escapeHtml(x.island)}</span><span style="color:var(--ink-soft);font-size:calc(12.5px * var(--en-scale));">${escapeHtml(x.atoll)}</span>
         </button>
       `).join('') : `<div class="custom-select-title" style="padding:16px 22px 20px;">No matching island \u2014 whatever you've typed will be used as-is.</div>`;
     } else {
@@ -14205,7 +14383,7 @@ function openIslandSearchPopup(input, onPick, opts){
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.15s ease;transform:rotate(${open ? '180deg' : '0deg'});"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           ${open ? MALDIVES_ATOLLS[atoll].map(island => `
-            <button type="button" class="custom-select-option" data-pick-island="${escapeHtml(island)}" style="padding-left:40px;background:rgba(255,255,255,0.06);color:rgba(244,249,255,0.88);">
+            <button type="button" class="custom-select-option" data-pick-island="${escapeHtml(island)}" style="padding-left:40px;background:var(--paper-dark);color:var(--ink);">
               <span>${escapeHtml(island)}</span>
             </button>
           `).join('') : ''}
