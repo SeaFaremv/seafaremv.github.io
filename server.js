@@ -157,7 +157,7 @@ app.get('/api/data/:boatId/:key', async (req, res) => {
     let value = rows.length ? rows[0].value : null;
     if (key === 'settings') {
       const orgRows = await sql`
-        SELECT o.is_pro, o.pro_started_at, o.pro_expires_at, o.plan_limits_enabled FROM boats b
+        SELECT o.is_pro, o.pro_started_at, o.pro_expires_at, o.plan_limits_enabled, b.created_at AS boat_created_at FROM boats b
         JOIN organizations o ON o.id = b.organization_id
         WHERE b.id = ${boatId}
       `;
@@ -167,6 +167,11 @@ app.get('/api/data/:boatId/:key', async (req, res) => {
         value.proStartedAt = orgRows[0].pro_started_at;
         value.proExpiresAt = orgRows[0].pro_expires_at;
         value.planLimitsEnabled = orgRows[0].plan_limits_enabled;
+        // When this boat was created -- lets the client show its
+        // first-day-only onboarding copy (see renderStaffManagement in
+        // index.html) exactly once, on the actual calendar day the boat
+        // signed up, rather than on every visit to Settings forever.
+        value.boatCreatedAt = orgRows[0].boat_created_at;
       }
       value = sanitizeSettingsForClient(value, boatId);
     }
