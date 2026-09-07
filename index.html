@@ -281,6 +281,24 @@
      with no JS changes. */
   header.app-head #header-settings-btn{
     flex-shrink:0;
+    /* Belt-and-suspenders alongside the inline style on the button itself
+       (see markup below) -- the round shape people were seeing wasn't a
+       CSS background at all (background:none was already set), it was
+       the browser/OS's own native button chrome (the light gray
+       rounded fill Safari/Chrome draw on real <button> elements) showing
+       through because nothing had ever told the browser to turn that
+       default appearance off. -webkit-appearance/appearance:none strips
+       it, and the tap-highlight/outline resets cover the same look
+       reappearing on tap or focus instead. */
+    -webkit-appearance:none;
+    appearance:none;
+    -webkit-tap-highlight-color:transparent;
+    outline:none;
+  }
+  header.app-head #header-settings-btn:hover,
+  header.app-head #header-settings-btn:active,
+  header.app-head #header-settings-btn:focus{
+    background:none;
   }
   /* Small moon/sun theme toggle, sitting in the header right next to the
      settings gear (see header-settings-btn) rather than buried inside the
@@ -1626,7 +1644,7 @@ body.admin-mode{
         <span id="clock">--</span>
       </div>
     </div>
-    <button type="button" id="header-settings-btn" title="Menu" style="display:none;background:none;border:none;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+    <button type="button" id="header-settings-btn" title="Menu" style="display:none;background:none;border:none;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;padding:0;">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F4F9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
       </svg>
@@ -11677,7 +11695,7 @@ function renderAdminDashboard(){
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <h2 style="margin:0;">Super Admin</h2>
           <div style="display:flex;gap:8px;">
-            <button type="button" id="admin-menu-btn" title="Menu" style="background:rgba(11,72,124,0.08);border:none;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+            <button type="button" id="admin-menu-btn" title="Menu" style="background:none;border:none;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;outline:none;padding:0;">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--navy-deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
             </button>
           </div>
