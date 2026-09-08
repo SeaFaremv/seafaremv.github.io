@@ -344,6 +344,10 @@ const SWIPE_CLIENT_ID = process.env.SWIPE_CLIENT_ID;
 const SWIPE_CLIENT_SECRET = process.env.SWIPE_CLIENT_SECRET;
 const SWIPE_WEBHOOK_SECRET = process.env.SWIPE_WEBHOOK_SECRET;
 const MALDEXPRESS_SWIPE_WEBHOOK_URL = process.env.MALDEXPRESS_SWIPE_WEBHOOK_URL;
+// Shared secret Maldexpress sends (as X-Internal-Secret) when registering a
+// Swipe reference it just created -- see POST /api/internal/register-swipe-reference
+// below. Must match the value set on Maldexpress's Supabase Edge Function secrets.
+const SEAFARE_INTERNAL_SECRET = process.env.SEAFARE_INTERNAL_SECRET;
 const SWIPE_BASE_URL = process.env.SWIPE_ENV === 'development'
   ? 'https://merchant-api.swipeapp.dev'
   : 'https://api.swipe.mv';
@@ -616,6 +620,32 @@ app.post('/api/blocked-numbers/resolve', async (req, res) => {
   }
 });
 
+// Maldexpress registers a Swipe reference here the moment it creates a
+// payment link, before ever handing that link back to its own client --
+// closing the race where a webhook could fire before this row exists.
+// Gated by a shared secret header, not a Supabase session, since the
+// caller is a server (Maldexpress's edge function), not a browser.
+app.post('/api/internal/register-swipe-reference', async (req, res) => {
+  try{
+    if(!SEAFARE_INTERNAL_SECRET || req.headers['x-internal-secret'] !== SEAFARE_INTERNAL_SECRET){
+      return res.status(401).json({ registered:false, error:'Invalid internal secret.' });
+    }
+    const { reference, source } = req.body || {};
+    if(!reference || typeof reference !== 'string'){
+      return res.status(400).json({ registered:false, error:'reference is required.' });
+    }
+    await sql`
+      INSERT INTO external_swipe_references (reference, source)
+      VALUES (${reference}, ${source || 'unknown'})
+      ON CONFLICT (reference) DO NOTHING
+    `;
+    res.json({ registered:true });
+  }catch(e){
+    console.error('register-swipe-reference failed', e);
+    res.status(500).json({ registered:false, error:'Could not register reference.' });
+  }
+});
+
 // Swipe calls this whenever a transaction's status changes. Only
 // transaction.state_changed events with status COMPLETED, for a reference
 // we actually created a link for, ever grant Pro -- and only once (the
@@ -631,17 +661,26 @@ app.post('/api/webhooks/swipe', async (req, res) => {
     // --- Maldexpress relay ------------------------------------------------
     // The Swipe client/wallet behind this webhook is shared with a second
     // app (Maldexpress) for its own Pro payments, and Swipe only allows one
-    // webhook URL per client. Any event Maldexpress created -- identified by
-    // a transaction_code it minted with a "maldexpress_" prefix -- is not
-    // ours: forward the original request verbatim (same raw body, same
+    // webhook URL per client. Swipe assigns its own opaque transaction id --
+    // Maldexpress can never set a recognizable prefix on it -- so instead of
+    // pattern-matching the reference, check whether Maldexpress registered
+    // this exact id with us in advance (via
+    // POST /api/internal/register-swipe-reference, called right after it
+    // creates the payment link). A match means the event is not ours:
+    // forward the original request verbatim (same raw body, same
     // webhook-id/webhook-timestamp/webhook-signature headers) to
     // Maldexpress's own endpoint and mirror that call's outcome back to
     // Swipe, so a failure there still gets retried by Swipe. SeaFare does no
-    // further processing for these events. Events without the prefix fall
+    // further processing for these events. Unregistered events fall
     // straight through to SeaFare's own logic below, unchanged. If
     // MALDEXPRESS_SWIPE_WEBHOOK_URL is unset the relay is inert.
-    const swipeRef = (req.body && req.body.data && req.body.data.transaction_code) || '';
-    if(MALDEXPRESS_SWIPE_WEBHOOK_URL && swipeRef.startsWith('maldexpress_')){
+    const swipeTxId = (req.body && req.body.data && (req.body.data.transaction_id || req.body.data.id)) || '';
+    let isMaldexpressRef = false;
+    if(MALDEXPRESS_SWIPE_WEBHOOK_URL && swipeTxId){
+      const registered = await sql`SELECT 1 FROM external_swipe_references WHERE reference = ${swipeTxId}`;
+      isMaldexpressRef = registered.length > 0;
+    }
+    if(isMaldexpressRef){
       if(!req.rawBody){
         // Only the exact bytes Swipe signed can be forwarded -- a
         // re-serialized body would fail Maldexpress's signature check.
